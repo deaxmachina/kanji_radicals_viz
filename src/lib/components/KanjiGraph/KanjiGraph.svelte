@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import _ from 'lodash'
+  import * as d3 from 'd3'
   import '$lib/styles/global.scss';
 
   import dataGraph from "$lib/assets/graph_all.json"
@@ -12,43 +13,53 @@
   ////////////////////////////
   ///// Graph properties /////
   ////////////////////////////
-  // Width and height of the window
-  let innerWidth 
-  let innerHeight
-  $: minDimWindow = Math.max(innerWidth, innerHeight) // Width and height of graph container will be set based on this
-
   // Width and height of the graph container (read-only variables)
-  $: w = minDimWindow
-  $: h = innerHeight
-  const margin = { top: 0, right: 0, bottom: 0, left: 0 }
-  $: boundedWidth = w - margin.left - margin.right
-	$: boundedHeight = h - margin.top - margin.bottom
-  const marginForOuterCircle = 0 // How much to leave around outer circle of kanji so that they comfortably fit
-  $: radiusGroups = Math.min(boundedWidth, boundedHeight) - marginForOuterCircle // Radius for the kanji around the radicals
-  $: widthKanjiBox = w >= 800 ? 24 : 10 // Size of the kanji squares (or circles) depending on width
+  let w 
+  let h
+  // Properties based on the width and height of the container
+  $: aspectRatio = w / h
+  $: aspectRatioHorizontal = aspectRatio > 1
+  const marginForOuterCircle = 200 // How much to leave around outer circle of kanji so that they comfortably fit
+  $: radiusGroups = Math.min(w, h) - marginForOuterCircle // Radius for the kanji around the radicals
+  $: widthKanjiBox = w >= 800 ? 24 : 20 // Size of the kanji squares (or circles) depending on width
   // Things that depend on the filtered data
   $: links = dataGraphFiltered.links.map(d => Object.create(d));
   $: nodes = dataGraphFiltered.nodes.map(d => Object.create(d));
   $: subcategories = _.uniqBy(nodes, d => d.subcategory).map(d => d.subcategory).filter(d => d !== 0)
+  // Constant props 
+  const grades = ['1', '2', '3', '4', '5', '6', 'S']
+  const colours = {
+      colBg: '#352d39',
+      colLinks: "#b1a7a6",      
+      colRadicals: '#f7ede2', //'#5e6472',
+      colRadicalsText: '#352d39',
+      colStrokeRadicals: "#fff",  
+      colKanjiText: '#fff',
+      colStrokeKanji: "#111",
+      colLevels: ['#cce3de', '#a4c3b2', '#6b9080', '#d1b3c4', '#b392ac', '#735d78', '#fe6d73'],
+      colMissingKanji: '#111111',
+      
+    }
+  const scaleFactorDeg = 0.06 // Scale factor for the degree of the nodes of the radicals
 
   // The graph props are reactive as they depend on other reactive declarations or variable
 	$: props = {
 		width: w,
 		height: h,
-		margin: margin,
-		boundedWidth: boundedWidth,
-		boundedHeight: boundedHeight,
+    aspectRatioHorizontal,
     graphProps: {
       marginForOuterCircle,
       radiusGroups,
-      widthKanjiBox
-    }
+      widthKanjiBox,
+      scaleFactorDeg
+    },
+    colours,
+    grades
 	}
 
   ////////////////////////////
   /// Interactive Elements ///
   ////////////////////////////
-  const grades = ['1', '2', '3', '4', '5', '6', 'S']
   const categories = _.uniqBy(dataGraph.nodes, d => d.category).map(d => d.category).filter(d => d !== 0)
   let selectedCategory // To store the kanji category selected 
   $: dataGraphFiltered = filterKanjiDataByCategory(dataGraph, selectedCategory) // Filter the data based on selected categoty
@@ -61,23 +72,13 @@
   ////////////////////////////
   let graphContainer
   const kanjiGraph = new KanjiGraph()
-  // // Set up and draw the graph for the first time - doesn't work when the svelte window is involved
-  // onMount(() => {
-  //   console.log('drawing a graph for the first time')
-  //   if (innerWidth && innerHeight && minDimWindow) {
-  //     kanjiGraph
-	// 			.selection(graphContainer)
-	// 			.data({ dataGraphFiltered, nodesCopy, linksCopy, dataKanjiLevels })
-	// 			.props(props)
-	// 			.draw()	
-  //   }
-  // })
 
-  $: if (graphContainer && innerWidth && innerHeight && minDimWindow) {  
+  $: if (graphContainer) {  
     console.log('drawing graph from reactive')
+    //d3.selectAll('.kanji-graph-svg').remove()
     kanjiGraph
 				.selection(graphContainer)
-				.data({ dataGraphFiltered, nodes, links, nodesCopy, linksCopy, subcategories, dataKanjiLevels })
+				.data({ nodes, links, nodesCopy, linksCopy, subcategories, dataKanjiLevels })
 				.props(props)
 				.draw()	
     
@@ -86,7 +87,6 @@
 </script>
 
 
-<svelte:window bind:innerWidth={innerWidth} bind:innerHeight={innerHeight}/>
 <section id='kanji-graph-section'>
 
   <div class='kanji-category-selector-container'>
@@ -101,15 +101,35 @@
   <div
     id='kanji-graph-container'
     bind:this={graphContainer}
-    style='width: {minDimWindow}px; height: {innerHeight}px;'
+    bind:clientHeight={h}
+    bind:clientWidth={w}
   >
   </div>
 
 </section>
 
+
 <style lang='scss'>
+  #kanji-graph-section {
+    width: 100vw;
+    background-color: red;
+  }
   #kanji-graph-container {
     background-color: red;
     margin: auto;
+    height: 1100px; // Should be a fixed number rather than in vh as that will keep changing if height of window changes and thus re-draw the whole graph
+    width: 100%;
+  }
+  :global {
+        text.node-text {
+        }
+        text.radical-text {
+          font-weight: 900;
+          font-family:'Times New Roman', Times, serif;
+        }
+        text.kanji-text {
+          font-weight: 100;
+          font-family: Arial, Helvetica, sans-serif;
+        }
   }
 </style>

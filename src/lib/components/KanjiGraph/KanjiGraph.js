@@ -24,20 +24,17 @@ class KanjiGraph {
 
   defaultData = [];
   defaultProps = {
-    colours: {
-      colourMissingKanji: '#111111',
-      colourRadicals: '#f7ede2', //'#5e6472'
-      colBg: '#352d39',
-      colLevels: ['#cce3de', '#a4c3b2', '#6b9080', '#d1b3c4', '#b392ac', '#735d78', '#fe6d73'],
-      colLinks: "#b1a7a6"
-    },
+    mobile: {
+      verticalScaleFactor: 1.8,
+      yOffsetForKanjiStart: 450
+    }
   }
 	
 	draw() {
-    const { dataGraphFiltered, nodes, links, nodesCopy, linksCopy, subcategories, dataKanjiLevels } = this.data();
-    const { width, height, margin, boundedWidth, boundedHeight, colours, graphProps } = this.props();
-    console.log('nodes, links,', nodes, links)
+    const { nodes, links, nodesCopy, linksCopy, subcategories, dataKanjiLevels } = this.data();
+    const { width, height, aspectRatioHorizontal, colours, graphProps, grades, mobile } = this.props();
 
+    let simulation
 
     ////////////////////////////////
     ////////// Container ///////////
@@ -45,44 +42,48 @@ class KanjiGraph {
 		const svg = this.selection()
       .appendSelect('svg')
       .attr('width', width)
-      .attr('height', height)
+      .attr('height', aspectRatioHorizontal ? height : height * mobile.verticalScaleFactor)
       .classed('kanji-graph-svg', true)
       .style('background-color', colours.colBg)
 
     const g = svg.appendSelect('g')
       .classed('group', true)
-      .attr('transform', `translate(${width*0.5}, ${height*0.1})`)
+      .attr('transform', `translate(${ 
+        width*0.5
+      }, ${
+        height*0.1
+      })`)
 
     ////////////////////////////////
     /////////// Scales /////////////
     ////////////////////////////////
-    // For radial positioning 
+    // Scale for desktop to position in a circle
     const subcategoryRadialScale = d3.scaleBand()
       .domain(subcategories)
       .range([Math.PI*3/2, Math.PI*0.5])
-
-    // Colour scales for kanji by level (grade)
+    // Scale for mobile to position vertically 
+    const subcategoryVerticalScale = d3.scaleBand()
+      .domain(subcategories)
+      .range([mobile.yOffsetForKanjiStart, height * mobile.verticalScaleFactor])
+    // Colour scale for kanji by level (grade)
     const colourByGradeScale = d3.scaleOrdinal()
-      .domain(['1', '2', '3', '4', '5', '6', 'S'])
+      .domain(grades)
       .range(colours.colLevels)
-
 
     /////////////////////////////////////////////////
     ///////////// Simulation Definition /////////////
     /////////////////////////////////////////////////
-    const scaleFactorDeg = 0.06 // Scale factor for the degree of the nodes of the radicals
-    const scaleFunction = d => d.type === 'radical' ? 1 + linksCopy.filter(l => l.source === d.id).length * scaleFactorDeg : 1
+    const scaleFunction = d => d.type === 'radical' ? 1 + linksCopy.filter(l => l.source === d.id).length * graphProps.scaleFactorDeg : 1
     const scaleFunctionNodes = d => `scale(${scaleFunction(d)})`
-    //const radiusCollide = d => graphProps.widthKanjiBox * 0.6 * scaleFunction(d) // Needs a fix 
+    //const radiusCollide = d => graphProps.widthKanjiBox * 0.6 * scaleFunction(d)
     const radiusCollide = d => d.type === 'radical' 
-      ? graphProps.widthKanjiBox*0.3 + graphProps.widthKanjiBox * (linksCopy.filter(l => l.source === d.id).length * scaleFactorDeg) 
-      : graphProps.widthKanjiBox*0.65
+      ? graphProps.widthKanjiBox*0.4 + graphProps.widthKanjiBox * (linksCopy.filter(l => l.source === d.id).length * graphProps.scaleFactorDeg) 
+      : graphProps.widthKanjiBox*0.6
 
     // Forces 
     const linkForce = d3.forceLink(links).id(d => d.id)
     const collideForce = d3.forceCollide().radius(radiusCollide).iterations(2).strength(1)
-    const radialForce = d3.forceRadial(0).strength(0.4)
-
+    // Radically position around a circle
     const xForceRadial = d3.forceX(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[0]
       : 0
@@ -91,13 +92,39 @@ class KanjiGraph {
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[1]
       : 0
     ).strength(1)
+    // Vertically position 
+    const yForce = d3.forceY(d => (d.type === 'kanji' && d.subcategory !== 0)
+      ? subcategoryVerticalScale(d.subcategory)
+      : 0
+    ).strength(3)
+    const xForce = d3.forceX(d => 0).strength(1)
 
     // Simulation with forces 
-    const simulation = d3.forceSimulation(nodes)
-      .force('link', linkForce)
-      .force('collide', collideForce)
-      .force('x', xForceRadial)
-      .force('y', yForceRadial)
+    if (aspectRatioHorizontal) {
+      simulation = d3.forceSimulation(nodes)
+        .force('link', linkForce)
+        .force('collide', collideForce)
+        .force('xForceRadial', xForceRadial)
+        .force('yForceRadial', yForceRadial)
+        simulation.force("xForce", null)
+        simulation.force("yForce", null)
+    } else {
+      simulation = d3.forceSimulation(nodes)
+        .force('link', linkForce)
+        .force('collide', collideForce)
+        .force('xForce', xForce)
+        .force('yForce', yForce)
+        simulation.force("xForceRadial", null)
+        simulation.force("yForceRadial", null)
+    }
+
+    // First run the simulation to compute the final layout and then use the computed layout properties to 
+    // pass into the logic for drawing the graph below
+    const NUM_ITERATIONS = 400;
+    for (let i = 0; i < NUM_ITERATIONS; ++i) {
+      simulation.tick();
+    };
+    simulation.stop();
 
 
     ////////////////////////////////
@@ -112,13 +139,16 @@ class KanjiGraph {
         .data(links)
         .join("line")
         .classed('link', true)
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y)
 
     ////////////////////////////////
     /////////// Nodes //////////////
     ////////////////////////////////
     const nodeG = g.appendSelect("g")
       .attr('class', 'g-nodes')
-      .style("stroke", "#fff")
 
     // One group for each node to include node box and kanji 
     const nodesG = nodeG
@@ -127,6 +157,7 @@ class KanjiGraph {
     .join('g')
       .classed('node-g', true)
       .style('cursor', 'pointer')
+      .attr('transform', d => `translate(${d.x}, ${d.y})`)
 
     const nodeBox = nodesG.selectAll('.node-box')
       .data(d => [d])
@@ -137,45 +168,46 @@ class KanjiGraph {
         .attr('width', graphProps.widthKanjiBox)
         .attr('height', graphProps.widthKanjiBox)
         .attr('transform', d => scaleFunctionNodes(d))
-        .style('stroke', '#fff')
+        .style('stroke', d => d.type === 'kanji' ? colours.colStrokeKanji : colours.colStrokeRadicals)
         .style('stroke-width', 1)
         .style("stroke-opacity", 1)
         .style("fill", d => d.type === 'kanji' 
               ? _.find(dataKanjiLevels, e => e.kanji === d.kanji)
                 ? colourByGradeScale( _.find(dataKanjiLevels, e => e.kanji === d.kanji).Grade )
-                : colours.colourMissingKanji
-              : colours.colourRadicals
+                : colours.colMissingKanji
+              : colours.colRadicals
               )
 
     const nodeText = nodesG.selectAll(".node-text")
       .data(d => [d])
       .join("text")
         .classed('node-text', true)
+        .classed('kanji-text', d => d.type === 'kanji')
+        .classed('radical-text', d => d.type === 'radical')
         .text(d => d.kanji)
-        .classed('kanji-text', true)
         .attr('text-anchor', 'middle')
         .attr('dy', '0.35em')
-        .style('font-size', `${graphProps.widthKanjiBox*3/4}px`)
+        .style('font-size', `${graphProps.widthKanjiBox * 0.8}px`)
         //.style('font-weight', 'lighter')
         .style('stroke', 'none')
-        .style('fill', d => d.type === 'radical' ? colours.colBg : 'white')
+        .style('fill', d => d.type === 'radical' ? colours.colRadicalsText : colours.colKanjiText)
         .attr('transform',  d => scaleFunctionNodes(d))
 
     ////////////////////////////////
     /////// Simulation Start ///////
     ////////////////////////////////
-    simulation.on("tick", () => {
-      link
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
+    // simulation.on("tick", () => {
+    //   link
+    //     .attr("x1", d => d.source.x)
+    //     .attr("y1", d => d.source.y)
+    //     .attr("x2", d => d.target.x)
+    //     .attr("y2", d => d.target.y)
   
-      nodesG
-        .attr('transform', d => `translate(${d.x}, ${d.y})`)
-        //.attr("stroke", d => (d.fx ? "#333" : "#fff"));
-    });
-  
+    //   nodesG
+    //     .attr('transform', d => `translate(${d.x}, ${d.y})`)
+    // });
+    //simulation.on('end', () => simulation.restart())
+    //setTimeout(() => simulation.stop(), 6000)
     //invalidation.then(() => simulation.stop());
 
 			
