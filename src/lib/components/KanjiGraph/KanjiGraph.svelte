@@ -4,11 +4,11 @@
   import * as d3 from 'd3'
   import '$lib/styles/global.scss';
 
-  import dataGraph from "$lib/assets/graph_all.json"
-  import dataKanjiLevels from "$lib/assets/kanji_levels.json"
+  import dataGraph from "./data/graph_all.json"
+  import dataKanjiLevels from "./data/kanji_levels.json"
 
-  import { filterKanjiDataByCategory } from './helperFunctions'
-  import KanjiGraph from './KanjiGraph'
+  import { filterKanjiDataByCategory } from './helperFunctions.js'
+  import KanjiGraph from './KanjiGraph.js'
 
   ////////////////////////////
   ///// Graph properties /////
