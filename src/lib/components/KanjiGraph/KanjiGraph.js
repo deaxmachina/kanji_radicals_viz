@@ -32,7 +32,7 @@ class KanjiGraph {
 	
 	draw() {
     const { nodes, links, nodesCopy, linksCopy, subcategories, dataKanjiLevels } = this.data();
-    const { width, height, aspectRatioHorizontal, colours, graphProps, grades, mobile, selectedCategory } = this.props();
+    const { width, height, aspectRatioHorizontal, colours, graphProps, grades, mobile, selectedCategory, linkForceByCategory } = this.props();
 
     let simulation
 
@@ -42,7 +42,7 @@ class KanjiGraph {
 		const svg = this.selection()
       .appendSelect('svg')
       .attr('width', width)
-      .attr('height', aspectRatioHorizontal ? height : height * mobile.verticalScaleFactor)
+      .attr('height', aspectRatioHorizontal ? height*1.05 : height * mobile.verticalScaleFactor)
       .classed('kanji-graph-svg', true)
       .style('background-color', colours.colBg)
 
@@ -110,17 +110,17 @@ class KanjiGraph {
       : graphProps.widthKanjiBox*0.66
 
     // Forces 
-    const linkForce = d3.forceLink(links).id(d => d.id).strength(selectedCategory === 'Physical Attributes and Properties' ? 0.25 : 0.35)
+    const linkForce = d3.forceLink(links).id(d => d.id).strength(linkForceByCategory[selectedCategory])
     const collideForce = d3.forceCollide().radius(radiusCollide).iterations(2).strength(1)
     // Radically position around a circle
     const xForceRadial = d3.forceX(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[0]
       : 0
-    ).strength(1)
+    ).strength(1.4)
     const yForceRadial = d3.forceY(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[1]
       : 0
-    ).strength(1.3)
+    ).strength(1.4)
     // Vertically position 
     const yForce = d3.forceY(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? subcategoryVerticalScale(d.subcategory)
@@ -230,24 +230,40 @@ class KanjiGraph {
         .style('fill', d => d.type === 'radical' ? colours.colRadicalsText : colours.colKanjiText)
         .attr('transform',  d => scaleFunctionNodes(d))
 
-    ////////////////////////////////
-    /////// Simulation Start ///////
-    ////////////////////////////////
-    // simulation.on("tick", () => {
-    //   link
-    //     .attr("x1", d => d.source.x)
-    //     .attr("y1", d => d.source.y)
-    //     .attr("x2", d => d.target.x)
-    //     .attr("y2", d => d.target.y)
-  
-    //   nodesG
-    //     .attr('transform', d => `translate(${d.x}, ${d.y})`)
-    // });
-    //simulation.on('end', () => simulation.restart())
-    //setTimeout(() => simulation.stop(), 6000)
-    //invalidation.then(() => simulation.stop());
+    ///////////////////////////////////////
+    //////// Subcategories Nodes //////////
+    ///////////////////////////////////////
+    const subcategoriesNodesG = g.appendSelect("g.subcategories-nodes-g")
+      .attr('class', 'subcategories-nodes-g')
+    const subcategoriesNodeG = subcategoriesNodesG.selectAll('.subcategory-node-g')
+      .data(subcategories)
+      .join('g')
+      .classed('subcategory-node-g', true)
+      .attr('transform', d => 
+        aspectRatioHorizontal 
+          ? `translate(${
+            d3.pointRadial(subcategoryRadialScale(d), graphProps.radiusGroups/2)[0]
+          }, ${
+            d3.pointRadial(subcategoryRadialScale(d), graphProps.radiusGroups/2)[1]
+          })`
+          : `translate(${150}, ${subcategoryVerticalScale(d) - subcategoryVerticalScale.bandwidth()/2})`
+        )
+      .style('cursor', 'pointer')
 
-			
+    const subcategoriesNodesBox = subcategoriesNodeG.appendSelect('circle.subcategories-nodes-box')
+      .attr('r', 14)
+      .style('fill', colours.colSubcategoriesNodes)
+      .style('stroke-dasharray', '2 2')
+      .style('stroke', colours.colText)
+
+    const subcategoriesNodesLabel = subcategoriesNodeG.appendSelect('text.subcategories-nodes-label')
+      .text((d, i) => subcategories.length - i)
+      .attr('dy', '0.35em')
+      .style('text-anchor', 'middle')
+
+        
+
+
 		return this;
 	}
 	
