@@ -42,7 +42,7 @@ class KanjiGraph {
 		const svg = this.selection()
       .appendSelect('svg')
       .attr('width', width)
-      .attr('height', aspectRatioHorizontal ? height*1.05 : height * mobile.verticalScaleFactor)
+      .attr('height', aspectRatioHorizontal ? height*1 : height * mobile.verticalScaleFactor)
       .classed('kanji-graph-svg', true)
       .style('background-color', colours.colBg)
 
@@ -51,7 +51,7 @@ class KanjiGraph {
       .attr('transform', `translate(${ 
         width*0.5
       }, ${
-        aspectRatioHorizontal ? height*0.17 : height*0.1
+        aspectRatioHorizontal ? height*0.1 : height*0.1
       })`)
 
     ////////////////////////////////
@@ -89,7 +89,7 @@ class KanjiGraph {
     // Scale for desktop to position in a circle
     const subcategoryRadialScale = d3.scaleBand()
       .domain(subcategories)
-      .range([Math.PI*1.5, Math.PI*0.45])
+      .range([Math.PI*1.5, Math.PI*0.5])
     // Scale for mobile to position vertically 
     const subcategoryVerticalScale = d3.scaleBand()
       .domain(subcategories)
@@ -107,7 +107,7 @@ class KanjiGraph {
     //const radiusCollide = d => graphProps.widthKanjiBox * 0.6 * scaleFunction(d)
     const radiusCollide = d => d.type === 'radical' 
       ? graphProps.widthKanjiBox*0.45 + graphProps.widthKanjiBox * 0.9 * (linksCopy.filter(l => l.source === d.id).length * graphProps.scaleFactorDeg) 
-      : graphProps.widthKanjiBox*0.66
+      : graphProps.widthKanjiBox*0.7
 
     // Forces 
     const linkForce = d3.forceLink(links).id(d => d.id).strength(linkForceByCategory[selectedCategory])
@@ -116,11 +116,11 @@ class KanjiGraph {
     const xForceRadial = d3.forceX(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[0]
       : 0
-    ).strength(1.4)
+    ).strength(1)
     const yForceRadial = d3.forceY(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[1]
       : 0
-    ).strength(1.4)
+    ).strength(2)
     // Vertically position 
     const yForce = d3.forceY(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? subcategoryVerticalScale(d.subcategory)
@@ -261,7 +261,111 @@ class KanjiGraph {
       .attr('dy', '0.35em')
       .style('text-anchor', 'middle')
 
-        
+    ///////////////////////////////////////
+    //////// Subcategories List ///////////
+    ///////////////////////////////////////
+    const mobileCondition = width <= 1100
+
+    const subcategoriesListG = svg.appendSelect("g.subcategories-list-g")
+      .attr('class', 'subcategories-list-g')
+      .attr('transform', (d, i) => `translate(${50}, ${0})`)
+
+    // Background 
+    const drawSubcategoriesBg = () => {
+      const subcategoriesListBg = subcategoriesListG.appendSelect("rect.subcategories-list-bg")
+        .attr('y', 30)
+        .attr('x', -30)
+        .attr('width',mobileCondition ? width : 380)
+        .attr('height', (subcategories.length + 1)*35)
+        .style('fill', '#f7ede2')
+        //.style('fill', 'pink')
+        .style('opacity', d => mobileCondition ? 0.95 : 0.3) // on small screens, opaque by defaul
+        .style('rx', 10)
+    }
+
+
+    const drawSubcategoriesList = () => {
+      const subcategoriesEntryG = subcategoriesListG.selectAll('.subcategory-entry-g')
+        .data(subcategories)
+        .join('g')
+        .classed('subcategory-entry-g', true)
+        .style('opacity', 0)
+        .attr('transform', (d, i) => `translate(${0}, ${i*35 + 60})`)
+
+      const subcategoriesEntriesBox = subcategoriesEntryG.appendSelect('circle.subcategories-entries-box')
+        .attr('r', 14)
+        .style('fill', colours.colSubcategoriesNodes)
+        .style('stroke-dasharray', '2 2')
+        .style('stroke', colours.colText)
+
+      const subcategoriesEntriesNum = subcategoriesEntryG.appendSelect('text.subcategories-entries-num')
+        .text((d, i) => i + 1)
+        .attr('dy', '0.35em')
+        .style('text-anchor', 'middle')
+
+      const subcategoriesEntriesText = subcategoriesEntryG.appendSelect('text.subcategories-entries-text')
+        .text((d, i) => d)
+        .attr('dy', '0.35em')
+        .attr('dx', '25px')
+        .style('text-anchor', 'start')
+
+      subcategoriesEntryG.transition().delay((d, i) => i * 100)
+        .style('opacity', 1)
+        .attr('transform', (d, i) => `translate(${0}, ${i*35 + 60})`)
+    }
+
+    // Label 'Subcategories'
+    const subcategoriesLabel = subcategoriesListG.appendSelect('text.subcategories-label')
+        .attr('dy', 20)
+        .attr('dx', -10)
+        .style('text-anchor', 'start')
+        .text('Subcategories')
+    let expanded = true // Whether to start with the menu expanded or not 
+    const pathMinusBtn = "M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"
+    const pathPlusBtn = "M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"
+    const subcategoriesExpandBtn = subcategoriesListG.appendSelect('g.subcategories-expand-btn')
+        //.attr('d', pathMinusBtn)
+        .attr('transform', `translate(${130}, ${0})scale(0.05)`)
+        .style('fill', 'hotpink')
+        .style('cursor', 'pointer')
+
+      const subcategoriesExpandBtnBg = subcategoriesExpandBtn.appendSelect('rect.subcategories-expand-btn-bg')
+        .attr('width', 600)
+        .attr('height', 600)
+        .style('opacity', 0.01)
+        .style('cursor', 'pointer')
+        .on('click', function(e, d){ 
+          if (!expanded) {
+            drawSubcategoriesBg()
+            drawSubcategoriesList()
+            subcategoriesExpandBtnSymbol.attr('d', pathMinusBtn)
+            // subcategoriesListBg
+            //   .transition().duration(1000)
+            //   .style('opacity', d => mobileCondition ? 0.95 : 0.6) // on small screens, opaque by defaul
+          }
+          if (expanded) {
+            subcategoriesListG.selectAll('.subcategory-entry-g')
+              .transition().delay((d, i) => (subcategories.length - i) * 100)
+              .style('opacity', 0)
+              .remove()
+            subcategoriesExpandBtnSymbol.attr('d', pathPlusBtn)
+            d3.selectAll("rect.subcategories-list-bg")
+              .transition().duration(1000)
+              .style('opacity', 0)
+              .remove()
+            //subcategoriesListBg.remove()
+            //d3.select(this).attr('d', pathPlusBtn)
+          }
+          expanded = !expanded
+      })
+
+    const subcategoriesExpandBtnSymbol = subcategoriesExpandBtn.appendSelect('path.subcategories-expand-btn-symbol')
+      .attr('d', pathMinusBtn)
+      .style('pointer-events', 'none')
+
+    drawSubcategoriesBg()
+    drawSubcategoriesList()
+
 
 
 		return this;

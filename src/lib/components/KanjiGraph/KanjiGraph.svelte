@@ -26,9 +26,9 @@
   $: aspectRatio = w / h
   $: aspectRatioHorizontal = aspectRatio > 1
   // How much to leave around outer circle of kanji so that they comfortably fit
-  $: marginForOuterCircle = w >= 1300 ? 200 : w >= 1200 ? 300 : aspectRatioHorizontal ? 400 : 50
+  $: marginForOuterCircle = w >= 1300 ? 300 : w >= 1200 ? 300 : aspectRatioHorizontal ? 400 : 50
   $: radiusGroups = Math.min(w, h) - marginForOuterCircle // Radius for the kanji around the radicals
-  $: widthKanjiBox = w >= 800 ? 26 : 20 // Size of the kanji squares (or circles) depending on width
+  $: widthKanjiBox = w >= 800 ? 22 : 20 // Size of the kanji squares (or circles) depending on width
   // Things that depend on the filtered data
   $: links = dataGraphFiltered.links.map(d => Object.create(d));
   $: nodes = dataGraphFiltered.nodes.map(d => Object.create(d));
@@ -53,7 +53,7 @@
   const scaleFactorDeg = 0.04 // Scale factor for the degree of the nodes of the radicals
   const linkForceByCategory = {
       "Physical Attributes and Properties": 0.3,
-      "Nature": 0.3,
+      "Nature": 0.4,
       "artificial structures and products": 0.4,
       "people (人)": 0.9,
       "emotions and senses (感)": 0.55,
@@ -104,8 +104,6 @@
     
 	}
 
-  $: console.log('categories', categories)
-
 </script>
 
 
@@ -144,11 +142,21 @@
           font-weight: 300;
           font-family: 'Noto Sans JP', sans-serif;
         }
-        text.subcategories-nodes-label {
+        text.subcategories-nodes-label, text.subcategories-entries-num, text.subcategories-entries-text {
           font-size: 14px;
-          color: #4d5054;
+          fill: #4d5054;
           font-family: 'houschka-rounded', sans-serif;
-          font-weight: 500;
+          font-weight: 600;
+        }
+        text.subcategories-entries-text {
+          font-size: 16px;
+          font-weight: 300;
+        }
+        text.subcategories-label {
+          font-size: 20px;
+          fill: #4d5054;
+          font-family: 'houschka-rounded', sans-serif;
+          font-weight: 600;
         }
   }
 </style>
