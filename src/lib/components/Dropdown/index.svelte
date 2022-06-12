@@ -69,11 +69,12 @@
     box-sizing: border-box;
     position: absolute;
     top: 10px;
-    right: 6px;
+    right: 5px;
     background-color: #fff;
     display: block;
     height: 24px;
-    width: 20px;
+    width: 24px;
+    padding-right: 35px;
     // border-radius: 0 10px 10px 0;
     // border: 3px solid $col-mid-grey;
     // border-left: none;

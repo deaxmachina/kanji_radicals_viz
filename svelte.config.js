@@ -55,8 +55,8 @@ export default {
 				noExternal: [],
 			},
 			optimizeDeps: {
-				exclude: ['d3'],
-				include: [],
+				exclude: [],
+				include: ['d3'],
 			  },
 		}
   }
