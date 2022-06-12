@@ -52,7 +52,7 @@ export default {
     }),
     vite: {
 			ssr: {
-				noExternal: ['d3'],
+				noExternal: ['d3', 'd3-appendselect'],
 			},
 			optimizeDeps: {
 				exclude: [],
