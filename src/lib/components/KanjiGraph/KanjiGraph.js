@@ -32,7 +32,7 @@ class KanjiGraph {
 	
 	draw() {
     const { nodes, links, nodesCopy, linksCopy, subcategories, dataKanjiLevels } = this.data();
-    const { width, height, aspectRatioHorizontal, colours, graphProps, grades, mobile, selectedCategory, linkForceByCategory } = this.props();
+    const { width, height, aspectRatioHorizontal, colours, graphProps, grades, mobile, selectedCategory, linkForceByCategory, mobileCondition } = this.props();
 
     let simulation
 
@@ -58,11 +58,11 @@ class KanjiGraph {
     /////////// Filters ////////////
     ////////////////////////////////
     const defs = svg.appendSelect("defs")
-    defs.appendSelect("filter")
+    const noiseFilter = defs.append("filter")
     .attr("id", "noise")
     .appendSelect("feTurbulence")
       .attr('type', 'fractalNoise')
-      .attr('baseFrequency', '1.29')
+      .attr('baseFrequency', '1.2')
       .attr('numOctaves', '2')
       .attr('result', 'noisy')
     .appendSelect("feColorMatrix")
@@ -73,14 +73,20 @@ class KanjiGraph {
       .attr('in2', 'noisy')
       .attr('mode', 'multiply')
 
-      // const bg = g.appendSelect('rect.bg-rect')
-      // .attr('x', -width/2)
-      // .attr('y', -height*0.1)
-      // .attr('width', width)
-      // .attr('height', height)
-      // .style('fill', colours.colBg)
-      // .style("filter", "url(#noise)")
-      // .style('opacity', 0.3)
+    const blurFilter = defs.append("filter")
+      .attr("id", "blur")
+      .append("feGaussianBlur")
+      .attr("stdDeviation", 10);
+
+    // const bg = svg.appendSelect('rect.bg-rect')
+    //   .attr('x', 0)
+    //   .attr('y', 0)
+    //   .attr('width', width)
+    //   .attr('height', height)
+    //   .style('fill', colours.colBg)
+    //   .style("filter", "url(#noise)")
+    //   .style('opacity', 0.3)
+    //   .style('pointer-events', 'none')
 
 
     ////////////////////////////////
@@ -199,7 +205,6 @@ class KanjiGraph {
         .attr('height', graphProps.widthKanjiBox)
         .attr('transform', d => scaleFunctionNodes(d))
         .style('stroke', d => d.type === 'kanji' 
-          //? colours.colStrokeKanji 
             ? _.find(dataKanjiLevels, e => e.kanji === d.kanji)
             ? colourByGradeScale( _.find(dataKanjiLevels, e => e.kanji === d.kanji).Grade )
             : colours.colMissingKanji
@@ -257,14 +262,14 @@ class KanjiGraph {
       .style('stroke', colours.colText)
 
     const subcategoriesNodesLabel = subcategoriesNodeG.appendSelect('text.subcategories-nodes-label')
-      .text((d, i) => subcategories.length - i)
+      .text((d, i) => i + 1)
       .attr('dy', '0.35em')
       .style('text-anchor', 'middle')
 
     ///////////////////////////////////////
     //////// Subcategories List ///////////
     ///////////////////////////////////////
-    const mobileCondition = width <= 1100
+    //const mobileCondition = width <= 800
 
     const subcategoriesListG = svg.appendSelect("g.subcategories-list-g")
       .attr('class', 'subcategories-list-g')
@@ -274,16 +279,16 @@ class KanjiGraph {
     const drawSubcategoriesBg = () => {
       const subcategoriesListBg = subcategoriesListG.appendSelect("rect.subcategories-list-bg")
         .attr('y', 30)
-        .attr('x', -30)
-        .attr('width',mobileCondition ? width : 380)
-        .attr('height', (subcategories.length + 1)*35)
-        .style('fill', '#f7ede2')
-        //.style('fill', 'pink')
-        .style('opacity', d => mobileCondition ? 0.95 : 0.3) // on small screens, opaque by defaul
+        .attr('x', mobileCondition ? -100 : -30)
+        .attr('width',mobileCondition ? width + 100 : 380)
+        .attr('height', (subcategories.length + 1)*35 + 20)
+        .style('fill', colours.colBg)
+        .style('opacity', d => mobileCondition ? 1 : 0.8) // on small screens, opaque by defaul
         .style('rx', 10)
+        .style("filter", "url(#blur)")
     }
 
-
+    // Draw the subcateogires list 
     const drawSubcategoriesList = () => {
       const subcategoriesEntryG = subcategoriesListG.selectAll('.subcategory-entry-g')
         .data(subcategories)
@@ -321,12 +326,14 @@ class KanjiGraph {
         .style('text-anchor', 'start')
         .text('Subcategories')
     let expanded = true // Whether to start with the menu expanded or not 
+    if (mobileCondition) {
+      expanded = false
+    } 
     const pathMinusBtn = "M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"
     const pathPlusBtn = "M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"
     const subcategoriesExpandBtn = subcategoriesListG.appendSelect('g.subcategories-expand-btn')
-        //.attr('d', pathMinusBtn)
         .attr('transform', `translate(${130}, ${0})scale(0.05)`)
-        .style('fill', 'hotpink')
+        .style('fill', colours.colAccent)
         .style('cursor', 'pointer')
 
       const subcategoriesExpandBtnBg = subcategoriesExpandBtn.appendSelect('rect.subcategories-expand-btn-bg')
@@ -339,13 +346,10 @@ class KanjiGraph {
             drawSubcategoriesBg()
             drawSubcategoriesList()
             subcategoriesExpandBtnSymbol.attr('d', pathMinusBtn)
-            // subcategoriesListBg
-            //   .transition().duration(1000)
-            //   .style('opacity', d => mobileCondition ? 0.95 : 0.6) // on small screens, opaque by defaul
           }
           if (expanded) {
             subcategoriesListG.selectAll('.subcategory-entry-g')
-              .transition().delay((d, i) => (subcategories.length - i) * 100)
+              .transition().delay((d, i) => (subcategories.length - i) * 70)
               .style('opacity', 0)
               .remove()
             subcategoriesExpandBtnSymbol.attr('d', pathPlusBtn)
@@ -353,19 +357,18 @@ class KanjiGraph {
               .transition().duration(1000)
               .style('opacity', 0)
               .remove()
-            //subcategoriesListBg.remove()
-            //d3.select(this).attr('d', pathPlusBtn)
           }
           expanded = !expanded
       })
 
     const subcategoriesExpandBtnSymbol = subcategoriesExpandBtn.appendSelect('path.subcategories-expand-btn-symbol')
-      .attr('d', pathMinusBtn)
+      .attr('d', () => !mobileCondition ? pathMinusBtn : pathPlusBtn)
       .style('pointer-events', 'none')
 
-    drawSubcategoriesBg()
-    drawSubcategoriesList()
-
+    if (expanded) {
+      drawSubcategoriesBg()
+      drawSubcategoriesList()
+    }
 
 
 		return this;

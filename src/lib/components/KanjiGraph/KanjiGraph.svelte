@@ -33,6 +33,7 @@
   $: links = dataGraphFiltered.links.map(d => Object.create(d));
   $: nodes = dataGraphFiltered.nodes.map(d => Object.create(d));
   $: subcategories = _.uniqBy(nodes, d => d.subcategory).map(d => d.subcategory).filter(d => d !== 0)
+  $: mobileCondition = w <= 800
   // Constant props 
   const grades = ['1', '2', '3', '4', '5', '6', 'S']
   const colours = {
@@ -49,22 +50,24 @@
       colLevels: ['#8dcaab', '#9fcfc0', '#bdb7cc', '#cfa1cb', '#ce8cbd', '#c170ab', '#a15da2'],
       colMissingKanji: '#4d5054',
       colText: '#4d5054',  
+      colAccent: '#c170ab'
     }
   const scaleFactorDeg = 0.04 // Scale factor for the degree of the nodes of the radicals
   const linkForceByCategory = {
-      "Physical Attributes and Properties": 0.3,
+      "Physical Attributes and Properties": 0.35,
       "Nature": 0.4,
-      "artificial structures and products": 0.4,
+      "artificial structures and products": 0.5,
       "people (人)": 0.9,
       "emotions and senses (感)": 0.55,
-      "human activities": 0.45,
-      "body (身)": 0.7
+      "human activities": 0.65,
+      "body (身)": 0.8
     }
 
   // The graph props are reactive as they depend on other reactive declarations or variable
 	$: props = {
 		width: w,
 		height: h,
+    mobileCondition,
     aspectRatioHorizontal,
     graphProps: {
       marginForOuterCircle,
