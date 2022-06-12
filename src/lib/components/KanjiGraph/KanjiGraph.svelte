@@ -130,7 +130,7 @@
   }
   #kanji-graph-container {
     margin: auto;
-    height: 1100px; // Should be a fixed number rather than in vh as that will keep changing if height of window changes and thus re-draw the whole graph
+    height: 1100px;
     width: 100%;
   }
   :global {

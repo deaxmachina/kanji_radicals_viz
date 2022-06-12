@@ -37,6 +37,7 @@ import sveltePreprocess from 'svelte-preprocess'
 // };
 
 export default {
+  preprocess: sveltePreprocess(),
   kit: {
     // default options are shown
     adapter: adapter({
