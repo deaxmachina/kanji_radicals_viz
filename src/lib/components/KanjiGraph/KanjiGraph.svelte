@@ -1,7 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
   import _ from 'lodash'
-  import * as d3 from 'd3'
   import '$lib/styles/global.scss';
   import { selectedCategory } from '$lib/stores.js'
 
@@ -52,7 +50,7 @@
   const scaleFactorDeg = 0.04 // Scale factor for the degree of the nodes of the radicals
   const linkForceByCategory = {
       "Physical Attributes and Properties": 0.35,
-      "Nature": 0.4,
+      "Nature": 0.35,
       "artificial structures and products": 0.5,
       "people (人)": 0.9,
       "emotions and senses (感)": 0.55,

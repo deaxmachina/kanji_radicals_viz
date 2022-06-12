@@ -1,6 +1,7 @@
 <script>
   import _ from 'lodash'
   import '$lib/styles/global.scss';
+  import Header from '$lib/components/Header/index.svelte'
   import KanjiGraph from '$lib/components/KanjiGraph/KanjiGraph.svelte'
   import Dropdown from '$lib/components/Dropdown/index.svelte'
   import GradeLegend from '$lib/components/GradeLegend/index.svelte'
@@ -11,6 +12,7 @@
 </script>
 
 <div class='wrapper'>
+  <Header />
   <Dropdown {categories} />
   <GradeLegend />
   <KanjiGraph {dataGraph} {dataKanjiLevels} {categories} />

@@ -122,11 +122,11 @@ class KanjiGraph {
     const xForceRadial = d3.forceX(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[0]
       : 0
-    ).strength(1)
+    ).strength(1.9)
     const yForceRadial = d3.forceY(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? d3.pointRadial(subcategoryRadialScale(d.subcategory), graphProps.radiusGroups)[1]
       : 0
-    ).strength(2)
+    ).strength(1.8)
     // Vertically position 
     const yForce = d3.forceY(d => (d.type === 'kanji' && d.subcategory !== 0)
       ? subcategoryVerticalScale(d.subcategory)
