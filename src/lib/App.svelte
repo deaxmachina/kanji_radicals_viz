@@ -3,6 +3,7 @@
   import '$lib/styles/global.scss';
   import KanjiGraph from '$lib/components/KanjiGraph/KanjiGraph.svelte'
   import Dropdown from '$lib/components/Dropdown/index.svelte'
+  import GradeLegend from '$lib/components/GradeLegend/index.svelte'
   import dataGraph from "./data/graph_all.json"
   import dataKanjiLevels from "./data/kanji_levels.json"
 
@@ -10,6 +11,7 @@
 </script>
 
 <Dropdown {categories} />
+<GradeLegend />
 <KanjiGraph {dataGraph} {dataKanjiLevels} {categories} />
 
 <style lang='scss'>

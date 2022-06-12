@@ -15,6 +15,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-netlify": "^1.0.0-next.64",
 		"@sveltejs/adapter-static": "^1.0.0-next.34",
 		"d3": "^7.4.4",
 		"d3-appendselect": "^2.0.0",
