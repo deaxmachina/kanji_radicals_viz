@@ -52,11 +52,11 @@ export default {
     }),
     vite: {
 			ssr: {
-				noExternal: [],
+				noExternal: ['d3'],
 			},
 			optimizeDeps: {
 				exclude: [],
-				include: ['d3'],
+				include: [],
 			  },
 		}
   }

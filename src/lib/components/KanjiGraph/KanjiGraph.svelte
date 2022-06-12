@@ -5,9 +5,6 @@
   import '$lib/styles/global.scss';
   import { selectedCategory } from '$lib/stores.js'
 
-  // import dataGraph from "../data/graph_all.json"
-  // import dataKanjiLevels from "../data/kanji_levels.json"
-
   import { filterKanjiDataByCategory } from './helperFunctions.js'
   import KanjiGraph from './KanjiGraph.js'
 
@@ -126,7 +123,8 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700&display=swap');
   @import url("https://use.typekit.net/pso5rde.css");
   #kanji-graph-section {
-    width: 100vw;
+    width: 100%;
+    margin: auto;
   }
   #kanji-graph-container {
     margin: auto;
@@ -138,7 +136,6 @@
         }
         text.radical-text {
           font-weight: 300;
-          //font-family:'Times New Roman', Times, serif;
           font-family: 'Noto Sans JP', sans-serif;
         }
         text.kanji-text {

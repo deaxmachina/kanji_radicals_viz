@@ -10,10 +10,16 @@
   const categories = _.uniqBy(dataGraph.nodes, d => d.category).map(d => d.category).filter(d => d !== 0)
 </script>
 
-<Dropdown {categories} />
-<GradeLegend />
-<KanjiGraph {dataGraph} {dataKanjiLevels} {categories} />
+<div class='wrapper'>
+  <Dropdown {categories} />
+  <GradeLegend />
+  <KanjiGraph {dataGraph} {dataKanjiLevels} {categories} />
+</div>
 
 <style lang='scss'>
   @import './styles/global.scss';
+  .wrapper {
+    max-width: 1800px;
+    margin: auto;
+  }
 </style>
