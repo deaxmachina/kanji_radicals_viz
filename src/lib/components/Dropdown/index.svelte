@@ -22,18 +22,25 @@
 <style lang='scss'>
   @import '../../../lib/styles/colors.scss';
   $width: 300px;
+  $mobile-width: 540px;
 
   .category-select-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 10px auto;
+    flex-wrap: wrap;
+    @media (max-width: $mobile-width) {
+    }
   }
 
   .label {
     color: $col-mid-grey;
     margin-right: 10px;
     font-weight: 400;
+    @media (max-width: $mobile-width) {
+      margin-bottom: 5px;
+    }
   }
 
   .custom-select {
@@ -42,6 +49,9 @@
     width: $width;
     height: 30px;
     margin-bottom: 10px;
+    @media (max-width: $mobile-width) {
+      margin-bottom: 30px;
+    }
   }
 
   select {
