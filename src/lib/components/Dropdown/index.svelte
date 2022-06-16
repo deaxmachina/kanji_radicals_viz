@@ -1,19 +1,32 @@
 <script>
   import '$lib/styles/colors.scss'
-  import { selectedCategory } from '$lib/stores.js'
+  import { selectedCategory, selectedLevel } from '$lib/stores.js'
   export let categories
-  //let selectedCategory = categories[0]
+  export let levels = ['Primary school', 'Secondary school']
+  export let view
 
 </script>
 
 <div class='category-select-wrapper'>
-  <h2 class='label'>Select a kanji category</h2>
+  <h2 class='label'>
+    Select a kanji {view}
+  </h2>
   <div class='custom-select'>
-    <select bind:value={$selectedCategory}>
-      {#each categories as category}
-        <option value={category}>{category}</option>
-      {/each}
-    </select>
+    {#if view === 'topic'}
+      <select bind:value={$selectedCategory}>
+        {#each categories as category}
+          <option value={category}>{category}</option>
+        {/each}
+      </select>
+    {:else if view === 'grade'}
+      <select bind:value={$selectedLevel}>
+        {#each levels as level}
+          <option value={level}>{level}</option>
+        {/each}
+      </select>
+    {:else}
+      <div></div>
+    {/if}
     <span class='custom-arrow'></span>
   </div>
 </div>

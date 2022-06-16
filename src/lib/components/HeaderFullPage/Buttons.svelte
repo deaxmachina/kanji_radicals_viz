@@ -1,10 +1,24 @@
 <script>
   import '$lib/styles/colors.scss'
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+
+  let selectedView = 'topic'
+  const setView = (view) => {
+    selectedView = view 
+    dispatch('view', {
+			text: selectedView
+		});
+  }
+
+
 </script>
 
 <div class='selection-buttons-section'>
-  <button class='topic-btn'><h5>topic</h5></button>
-  <button class='grade-btn'><h5>grade</h5></button>
+  <button class='topic-btn' on:click={() => setView('topic')}><h5>topic</h5></button>
+  <button class='grade-btn' on:click={() => setView('grade')}><h5>grade</h5></button>
+  <p>by</p>
 </div>
 
 
@@ -43,9 +57,13 @@
       position: absolute;
       right: 70%;
       top: 70%;
-      background-color: $col-pink-primary;
+      //background-color: $col-pink-primary;
+      border: 2px solid $col-pink-primary;
       display: flex;
       justify-content: flex-start;
+      &:hover {
+        background-color: $col-pink-primary;
+      }
       h5 {
         color: $col-green-primary;
         font-size: 50px;
@@ -55,12 +73,17 @@
         font-weight: 300;
       }
     }
+
     .topic-btn {
-      background-color: $col-green-primary;
+      //background-color: $col-green-primary;
+      border: 2px solid $col-green-primary;
       z-index: 21 !important;
       display: flex;
       justify-content: flex-end;
       align-items: flex-end;
+      &:hover {
+        background-color: $col-green-primary;
+      }
       h5 {
         color: $col-pink-primary;
         font-size: 50px;
@@ -69,6 +92,15 @@
         padding: 0;
         font-weight: 300;
       }
+    }
+
+    p {
+      position: absolute;
+      left: -10%;
+      top: 40%;
+      color: $col-mid-grey;
+      font-size: 18px;
+      font-family: 'lores-12', sans-serif;
     }
   }
 

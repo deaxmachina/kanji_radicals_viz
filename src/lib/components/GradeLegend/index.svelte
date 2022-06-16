@@ -1,6 +1,6 @@
 <script>
   import '$lib/styles/colors.scss'
-  const legendData = [
+  let legendDataAll = [
     {
       label: 'Grade 1',
       colour: '#8dcaab'
@@ -38,6 +38,9 @@
       colour: '#fff'
     }
   ]
+
+  export let view
+  $: legendData = view === 'topic' ? legendDataAll : legendDataAll.filter(d => d.label !== 'Not a jouyou kanji')
 </script>
 
 <div class='grade-legend-wrapper'>
