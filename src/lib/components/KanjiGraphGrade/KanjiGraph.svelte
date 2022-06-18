@@ -3,8 +3,6 @@
   import '$lib/styles/global.scss';
   import { getDataFilteredS, getDataFilteredP } from './helperFunctions'
   import { selectedLevel } from '$lib/stores.js'
-
-  //import { filterKanjiDataByCategory } from './helperFunctions.js'
   import KanjiGraph from './KanjiGraph.js'
 
   // Props passed down 
@@ -16,14 +14,42 @@
   // Width and height of the graph container (read-only variables)
   let w 
   let h
+  // Responsive variables 
+  $: small = w < 900
+  $: medium = w >= 900 && w < 1200
   // Properties based on the width and height of the container
-  $: aspectRatio = w / h
-  $: aspectRatioHorizontal = aspectRatio > 1
-  // How much to leave around outer circle of kanji so that they comfortably fit
-  $: marginForOuterCircle = w >= 1300 ? 300 : w >= 1200 ? 300 : aspectRatioHorizontal ? 400 : 50
-  $: radiusGroups = Math.min(w, h) - marginForOuterCircle // Radius for the kanji around the radicals
-  $: widthKanjiBox = w >= 800 ? 22 : 20 // Size of the kanji squares (or circles) depending on width
-  $: mobileCondition = w <= 800
+  $: marginForOuterCircle = w >= 1200 ? 300 : 100 // How much to leave around outer circle of kanji so that they comfortably fit - for secondary level only
+  $: radiusSecondary = Math.min(w, h) - marginForOuterCircle // Radius for the kanji around the radicals - for secondar level only
+  $: widthKanjiBox = w >= 1200 ? 22 : 18 // Size of the kanji squares (or circles) depending on width
+  const scaleFactorDeg = 0.02 // Scale factor for the degree of the nodes of the radicals
+  // The radius that each grade should be at if selected level is primary school
+  // For big screens
+  $: levelsRadial = ({
+    '1': 300,
+    '2': 400,
+    '3': 500,
+    '4': 600,
+    '5': 700,
+    '6': 800
+  })
+  // For medium screens
+  $: levelsRadialMid = ({
+    '1': 250,
+    '2': 300,
+    '3': 350,
+    '4': 400,
+    '5': 450,
+    '6': 500
+  })
+  const midSize = {
+    height: 2000,
+    yOffsetForKanjiStart: 500
+  }
+  const smallSize = {
+    height: 3000,
+    verticalScaleFactor: 2.5,
+    yOffsetForKanjiStart: 700
+  }
   // Constant props 
   const grades = ['1', '2', '3', '4', '5', '6', 'S']
   const colours = {
@@ -40,16 +66,6 @@
       colText: '#4d5054',  
       colAccent: '#c170ab'
     }
-  const scaleFactorDeg = 0.02 // Scale factor for the degree of the nodes of the radicals
-  // The radius that each grade should be at if selected level is primary school
-  const levelsRadial = ({
-    '1': 200,
-    '2': 450,
-    '3': 600,
-    '4': 750,
-    '5': 900,
-    '6': 1050
-  })
 
   ////////////////////////////
   /// Interactive Elements ///
@@ -73,15 +89,18 @@
 	$: props = {
 		width: w,
 		height: h,
-    mobileCondition,
-    aspectRatioHorizontal,
+    small: small,
+    medium: medium,
+    midSize: midSize,
+    smallSize: smallSize,
     selectedLevel: $selectedLevel,
     graphProps: {
       marginForOuterCircle,
-      radiusGroups,
+      radiusSecondary,
       widthKanjiBox,
       scaleFactorDeg,
-      levelsRadial
+      levelsRadial,
+      levelsRadialMid
     },
     colours,
     grades,
@@ -121,7 +140,7 @@
   }
   #kanji-graph-container {
     margin: auto;
-    height: 1100px;
+    //height: 100vh;
     width: 100%;
   }
   :global {

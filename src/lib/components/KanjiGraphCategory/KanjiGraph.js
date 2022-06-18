@@ -78,16 +78,6 @@ class KanjiGraph {
       .append("feGaussianBlur")
       .attr("stdDeviation", 10);
 
-    // const bg = svg.appendSelect('rect.bg-rect')
-    //   .attr('x', 0)
-    //   .attr('y', 0)
-    //   .attr('width', width)
-    //   .attr('height', height)
-    //   .style('fill', colours.colBg)
-    //   .style("filter", "url(#noise)")
-    //   .style('opacity', 0.3)
-    //   .style('pointer-events', 'none')
-
 
     ////////////////////////////////
     /////////// Scales /////////////
