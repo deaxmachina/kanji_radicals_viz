@@ -19,7 +19,12 @@
 <div class='selection-buttons-section'>
   <button class:active={selectedView === 'grade'} class='grade-btn' on:click={() => setView('grade')}>
     <h5>grade</h5>
-    <div on:click={() => { revealQuestion = !revealQuestion }} class='question'>?</div>
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <div 
+      on:mouseover={() => { revealQuestion = true }} 
+      on:mouseout={() => { revealQuestion = false }} 
+      class='question'
+    >?</div>
     <div class='message' style='opacity: {revealQuestion ? 1 : 0}'>! very slow, wait patiently~</div>
   </button>
   <button class:active={selectedView === 'topic'} class='topic-btn' on:click={() => setView('topic')}><h5>topic</h5></button>

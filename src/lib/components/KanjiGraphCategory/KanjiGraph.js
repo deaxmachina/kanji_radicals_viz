@@ -279,7 +279,7 @@ class KanjiGraph {
     }
 
     // Draw the subcateogires list 
-    const drawSubcategoriesList = () => {
+    const drawSubcategoriesList = (radicalData) => {
       const subcategoriesEntryG = subcategoriesListG.selectAll('.subcategory-entry-g')
         .data(subcategories)
         .join('g')
@@ -303,10 +303,21 @@ class KanjiGraph {
         .attr('dy', '0.35em')
         .attr('dx', '25px')
         .style('text-anchor', 'start')
+      
+      if (radicalData) {
+        const subcategoriesEntriesRadicals = subcategoriesEntryG.appendSelect('text.subcategories-entries-radicals')
+        .text((d, i) => radicalData.filter(el => el.category === d).length > 0 ? radicalData.filter(el => el.category === d)[0].count : '')
+        .attr('dy', '0.35em')
+        .attr('dx', '-20px')
+        .style('text-anchor', 'end')
+        .style('fill', colours.colAccent)
+      } else {
+        d3.selectAll('text.subcategories-entries-radicals').remove()
+      }
 
       subcategoriesEntryG.transition().delay((d, i) => i * 100)
         .style('opacity', 1)
-        .attr('transform', (d, i) => `translate(${0}, ${i*35 + 60})`)
+        .attr('transform', (d, i) => `translate(${radicalData ? 30 : 0}, ${i*35 + 60})`)
     }
 
     // Label 'Subcategories'
@@ -360,6 +371,55 @@ class KanjiGraph {
       drawSubcategoriesList()
     }
 
+
+    /////////////////////////////////////////////////
+    //////////////////// Events /////////////////////
+    /////////////////////////////////////////////////
+    const getCountOfKanjiCatPerRadical = (selectedRadical) => {
+      //const selectedRadical = '木'
+      const kanjiForRadical = _.uniq(linksCopy.filter(l => l.source === `${selectedRadical}`).map(d => d.target))
+      const kanjiData = nodesCopy.filter(n => kanjiForRadical.includes(n.id))
+      const kanjiPerCategory = _.countBy(kanjiData, d => d.subcategory)
+      // Transform to array so we can iterate over it later
+      const kanjiPerCategoryArr = []
+      for (const category in kanjiPerCategory) {
+        kanjiPerCategoryArr.push({ 'category': category, 'count': kanjiPerCategory[category] })
+      }
+      return kanjiPerCategoryArr
+    }
+    nodesG
+      .on("mouseenter", (evt, d) => {
+          // All the target nodes for selected node
+          const targetNodesIds = linksCopy.filter(l => l.target === d.id).map(l => l.source)
+          const sourceNodesIds = linksCopy.filter(l => l.source === d.id).map(l => l.target)
+          const nodesToHighlightIds = [...targetNodesIds, ...sourceNodesIds]
+          // Highlight the selected links
+          linksLine
+            .transition().duration(100)
+            .style('stroke-opacity', l => l.source.id === d.id || l.target.id === d.id ? 1 : 0)
+            .style("stroke-width", l => l.source.id === d.id || l.target.id === d.id ? 2 : 0.3)
+          // Highlight the connected nodes
+          nodesG
+            .transition().duration(100)
+            .style('opacity', n => n.id === d.id || nodesToHighlightIds.includes(n.id) ? 1 : 0.1)
+          // Update the count of kanji per category for the hovered radical
+          if (d.type === 'radical') {
+            const radicalData = getCountOfKanjiCatPerRadical(d.id)
+            drawSubcategoriesList(radicalData)
+          }
+      })
+      .on("mouseleave", (evt, d) => {
+        // Restore original graph
+        linksLine
+          .transition().duration(100)
+          .style('stroke-opacity', 0.3)
+          .style("stroke-width", 0.2)
+        nodesG
+          .transition().duration(100)
+          .style('opacity', 1)
+        // Remove any kanji per category text
+        drawSubcategoriesList()
+      })
 
 		return this;
 	}
