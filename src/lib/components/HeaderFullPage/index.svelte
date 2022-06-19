@@ -14,7 +14,7 @@
 
 <style lang='scss'>
   .header-full-page {
-    height: 100vh;
+    //height: 100vh;
     width: 100%;
     max-width: 1800px;
     margin: auto;

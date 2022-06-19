@@ -13,6 +13,8 @@
     y: undefined
   }
 
+  let frame
+
   const drawOnMountAndResize = () => {
     // Select the container with simple DOM selection 
     const container = wrapperEl
@@ -48,7 +50,8 @@
     }
 
     // Animate
-    let frame = requestAnimationFrame(loop);
+    window.cancelAnimationFrame(frame); // Remove any previous animation - as we're calling this on each resize
+    frame = requestAnimationFrame(loop);
     function loop(t) {
       frame = requestAnimationFrame(loop);
       ctx.clearRect(0, 0, width, height)
@@ -78,8 +81,11 @@ onMount(() => {
   }
   return () => {
     window.removeEventListener('resize', resize);
+    window.cancelAnimationFrame(frame);
 	};
 })
+
+
 
 </script>
 

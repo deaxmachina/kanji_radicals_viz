@@ -46,6 +46,8 @@
       </div>
     </div>
 
+    <i class="arrow down arrow-1"></i>
+    <i class="arrow down arrow-2"></i>
 </div>
 
 
@@ -74,6 +76,10 @@
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
+    @media (max-width: 700px) {
+      top: 10%;
+      transform: translate(-50%, -10%);
+    }
     h1 {
       padding: 0;
       margin: 0;
@@ -90,6 +96,7 @@
   }
 
   .container-foreground {
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
     display: flex;
@@ -97,6 +104,10 @@
     align-items: center;
     // align-items: flex-start;
     // margin-top: 12%; 
+    @media (max-width: 1400px) and (max-height: 1250px) {
+      align-items: flex-start;
+      padding-top: max(250px, 20%);
+    }
   }
 
   .content-foreground {
@@ -160,5 +171,23 @@
     }
   }
 
+
+  .arrow {
+    border: solid $col-green-primary;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    position: absolute;
+    left: 50%;
+    bottom: 80px;
+    &.down {
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+      &.arrow-2 {
+        bottom: 70px;
+        //border: solid $col-green-secondary;
+      }
+    }
+  }
 
 </style>

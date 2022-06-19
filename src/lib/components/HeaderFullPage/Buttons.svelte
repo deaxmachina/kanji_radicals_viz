@@ -12,12 +12,17 @@
 		});
   }
 
+  let revealQuestion = false
 
 </script>
 
 <div class='selection-buttons-section'>
-  <button class='topic-btn' on:click={() => setView('topic')}><h5>topic</h5></button>
-  <button class='grade-btn' on:click={() => setView('grade')}><h5>grade</h5></button>
+  <button class:active={selectedView === 'grade'} class='grade-btn' on:click={() => setView('grade')}>
+    <h5>grade</h5>
+    <div on:click={() => { revealQuestion = !revealQuestion }} class='question'>?</div>
+    <div class='message' style='opacity: {revealQuestion ? 1 : 0}'>! very slow, wait patiently~</div>
+  </button>
+  <button class:active={selectedView === 'topic'} class='topic-btn' on:click={() => setView('topic')}><h5>topic</h5></button>
   <p>by</p>
 </div>
 
@@ -39,10 +44,17 @@
     cursor: pointer;
     border: none;
     background-color: white;
-    //border: none;
     transition: transform 0.3s ease;
     &:hover {
       transform: scale(0.95);
+    }
+    @media (max-width: 600px) {
+      width: 240px;
+      height: 100px;
+    }
+    @media (max-width: 500px) {
+      width: 180px;
+      height: 100px;
     }
   }
 
@@ -53,14 +65,20 @@
     top: 60%;
     z-index: 20;
 
-    .grade-btn {
+    @media (max-width: 600px) {
+      top: 60%;
+    }
+
+    .topic-btn {
       position: absolute;
       right: 70%;
       top: 70%;
-      //background-color: $col-pink-primary;
-      border: 2px solid $col-pink-primary;
+      border: 1px dashed $col-pink-primary;
       display: flex;
       justify-content: flex-start;
+      &.active {
+        background-color: $col-pink-primary;
+      }
       &:hover {
         background-color: $col-pink-primary;
       }
@@ -71,16 +89,24 @@
         margin-left: 10px;
         padding: 0;
         font-weight: 300;
+        @media (max-width: 600px) {
+          font-size: 45px;
+        }
+        @media (max-width: 500px) {
+          font-size: 40px;
+        }
       }
     }
 
-    .topic-btn {
-      //background-color: $col-green-primary;
-      border: 2px solid $col-green-primary;
+    .grade-btn {
+      border: 1px dashed $col-green-primary;
       z-index: 21 !important;
       display: flex;
       justify-content: flex-end;
       align-items: flex-end;
+      &.active {
+        background-color: $col-green-primary;
+      }
       &:hover {
         background-color: $col-green-primary;
       }
@@ -91,6 +117,34 @@
         margin-right: 10px;
         padding: 0;
         font-weight: 300;
+        @media (max-width: 600px) {
+          font-size: 45px;
+        }
+        @media (max-width: 500px) {
+          font-size: 40px;
+        }
+      }
+      div.question {
+        position: absolute;
+        top: -25px; 
+        right: -10px;
+        //background-color: $light-color;
+        color: $col-mid-grey;
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-family: 'lores-12', sans-serif;
+        font-size: 16px;
+        //border: 0.8px dashed $col-mid-grey;
+      }
+      div.message {
+        position: absolute;
+        top: -25px; 
+        right: 20px;
+        background-color: $light-color;
+        color: $col-mid-grey;
+        padding: 0px 5px;
       }
     }
 
@@ -101,6 +155,10 @@
       color: $col-mid-grey;
       font-size: 18px;
       font-family: 'lores-12', sans-serif;
+      @media (max-width: 600px) {
+        top: 30%;
+        left: -15%;
+      }
     }
   }
 
