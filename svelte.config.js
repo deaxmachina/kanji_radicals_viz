@@ -55,7 +55,7 @@ export default {
 				noExternal: ['d3', 'd3-appendselect'],
 			},
 			optimizeDeps: {
-				exclude: [],
+				exclude: ['hex-rgb'],
 				include: [],
 			  },
 		}
