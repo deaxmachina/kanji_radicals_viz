@@ -1,7 +1,6 @@
 <script>
   import * as d3 from 'd3'
   import _ from 'lodash'
-  import { beforeUpdate } from 'svelte';
   import '$lib/styles/global.scss';
   import { getDataFilteredS, getDataFilteredP } from './helperFunctions'
   import { selectedLevel } from '$lib/stores.js'
@@ -9,49 +8,39 @@
   // Props passed down 
   export let dataGraph
 
-  ////////////////////////////
-  ///// Graph properties /////
-  ////////////////////////////
+  ////////////////////////////////////////////////////////
+  /////////////////// Graph properties ///////////////////
+  ////////////////////////////////////////////////////////
   // Width and height of the graph container (read-only variables)
   let width
   let height
-  // Responsive variables 
+  // Resposive markers
   $: small = width < 900
   $: medium = width >= 900 && width < 1200
-  // Properties based on the width and height of the container
-  $: marginForOuterCircle = width >= 1200 ? 300 : 100 // How much to leave around outer circle of kanji so that they comfortably fit - for secondary level only
-  $: radiusSecondary = Math.min(width, height) - marginForOuterCircle // Radius for the kanji around the radicals - for secondar level only
-  $: widthKanjiBox = width >= 1200 ? 22 : 18 // Size of the kanji squares (or circles) depending on width
-  const scaleFactorDeg = 0.02 // Scale factor for the degree of the nodes of the radicals
+  $: large = width >= 1200
+  $: screenSize = small ? 'small' : medium ? 'medium' : large ? 'large' : undefined
+  // Responsive sizes 
+  $: marginForOuterCircle = 200 // How much to leave around outer circle of kanji so that they comfortably fit - for secondary level only
+  $: radiusSecondary = width/2 - marginForOuterCircle // Radius for the kanji around the radicals - for secondar level only
+  $: widthKanjiBox = large ? 24 : 20 // Size of the kanji squares (or circles) depending on width
+  
+  /// Constant Props ///
   // The radius that each grade should be at if selected level is primary school
   // For big screens
-  const levelsRadial = ({
-    '1': 300,
-    '2': 400,
-    '3': 500,
-    '4': 600,
-    '5': 700,
-    '6': 800
-  })
+  //const levelsRadialLarge = ({ '1': 350, '2': 440, '3': 530, '4': 620, '5': 710, '6': 800 })
+  const levelsRadialLarge = ({ '1': 350, '2': 450, '3': 550, '4': 650, '5': 750, '6': 850 })
   // For medium screens
-  const levelsRadialMid = ({
-    '1': 250,
-    '2': 300,
-    '3': 350,
-    '4': 400,
-    '5': 450,
-    '6': 500
-  })
-  const midSize = {
-    height: 2000,
-    yOffsetForKanjiStart: 500
-  }
-  const smallSize = {
+  const levelsRadialMedium = ({ '1': 250, '2': 300, '3': 350, '4': 400, '5': 450, '6': 500 })
+  // Other positioning constants for different screen sizes
+  const smallSizeProps = {
     height: 3000,
     verticalScaleFactor: 2.5,
     yOffsetForKanjiStart: 700
   }
-  // Constant props 
+  const mediumSizeProps = {
+    height: 2000,
+    yOffsetForKanjiStart: 500
+  }
   const grades = ['1', '2', '3', '4', '5', '6', 'S']
   const colours = {
       colBg: '#f7ede2',//'#f7ede2', //'#352d39',
@@ -68,34 +57,31 @@
       colAccent: '#c170ab'
     }
 
-  ////////////////////////////
-  /// Interactive Elements ///
-  ////////////////////////////
-  //let selectedLevel = 'Primary school'
+  ////////////////////////////////////////////////////////
+  /////////////////// Data Computations //////////////////
+  ////////////////////////////////////////////////////////
   $: dataFilteredP = getDataFilteredP(dataGraph)
   $: dataFilteredS = getDataFilteredS(dataGraph)
   $: dataFiltered = $selectedLevel === 'Primary school' ? dataFilteredP : dataFilteredS
   // Get a clean copy of the nodes and links of the graph for the selected level 
   $: nodesCopy = _.cloneDeep(dataFiltered.nodes)
   $: linksCopy = _.cloneDeep(dataFiltered.links)
+  // Get a copy of links and nodes which we'll modify with forces
+  // $: links = dataFiltered.links.map(d => Object.create(d));
+  // $: nodes = dataFiltered.nodes.map(d => Object.create(d));
+  let nodes 
+  let links
 
-  // Things that depend on the filtered data
-  $: links = dataFiltered.links.map(d => Object.create(d));
-  $: nodes = dataFiltered.nodes.map(d => Object.create(d));
-
-  let graphContainer
-
-  ////////////////////////////////
-  //////////// Scales ////////////
-  ////////////////////////////////
-
+  ////////////////////////////////////////////////////////
+  /////////////////////// Scales  ////////////////////////
+  ////////////////////////////////////////////////////////
   // Scale for mobile to position vertically 
   $: subcategoryVerticalScale = d3.scalePoint()
     .domain(['1', '2', '3', '4', '5', '6'])
-    .range([smallSize.yOffsetForKanjiStart, smallSize.height + 200])
+    .range([smallSizeProps.yOffsetForKanjiStart, smallSizeProps.height + 200])
 
   // Colour scale for kanji by level (grade)
-  $: colourByGradeScale = d3.scaleOrdinal()
+  const colourByGradeScale = d3.scaleOrdinal()
     .domain(grades)
     .range(colours.colLevels)
 
@@ -105,56 +91,89 @@
     .toArray()
     .max()
     .value();
+  
+  // Scale radical nodes by their out degree
   $: radicalNodeSizeScale = d3.scaleSqrt()
     .domain([1, maxDegreeRadicalNode])
     .range([0.9, 2.8])
+  
 
-
-  /////////////////////////////////////////////////
-  ///////////// Simulation Definition /////////////
-  /////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////
+  ///////////////////// Simulation ///////////////////////
+  ////////////////////////////////////////////////////////
   $: scaleFunction = d => d.type === 'radical' ? radicalNodeSizeScale(linksCopy.filter(l => l.source === d.id).length) : 1
   $: scaleFunctionNodes = d => `scale(${scaleFunction(d)})`
-  $: radiusCollide = d => d.type === 'radical' ? widthKanjiBox * 0.62 * scaleFunction(d) : widthKanjiBox*0.7
+  $: radiusCollide = d => d.type === 'radical' ? widthKanjiBox * 0.55 * scaleFunction(d) : widthKanjiBox*0.65
   $: collideForce = d3.forceCollide().radius(radiusCollide).iterations(2).strength(1)
-  $:radialForceP = d3.forceRadial(d => d.type === 'kanji' 
-      ?  medium ? levelsRadialMid[d.Grade] : levelsRadial[d.Grade] 
-      : 0
-    ).strength(2.5)
-  //$: radialForceP = d3.forceRadial(0).strength(2.5)
-  $: radialForceS = d3.forceRadial(d => d.type === 'kanji' ? radiusSecondary : 0).strength(2.5)
+  //$: radialForceP = d3.forceRadial(d => d.type === 'kanji' ? levelsRadialLarge[d.Grade] : 0).strength(2.5)
+  $: radialForceP = d3.forceRadial(d => d.type === 'kanji' ?  
+      medium ? levelsRadialMedium[d.Grade] : large ? levelsRadialLarge[d.Grade] : 0
+    : 0
+  ).strength(2.3)
+  $: radialForceS = d3.forceRadial(d => d.type === 'kanji' ? radiusSecondary : 0).strength(0.9)
   $: radialForce = $selectedLevel === 'Primary school' ? radialForceP : radialForceS
-  $: linkForce = d3.forceLink(links).id(d => d.id)//.strength(1.2)
+  //$: linkForce = d3.forceLink(links).id(d => d.id)//.strength(1.2)
   // Vertically position 
-  $: yForce = d3.forceY(d => (d.type === 'kanji') ? subcategoryVerticalScale(d.Grade) : 0).strength(3)
-  $: xForce = d3.forceX(d => 0).strength(2)
+  $: yForce = $selectedLevel === 'Primary school' 
+    ? d3.forceY(d => (d.type === 'kanji') ? subcategoryVerticalScale(d.Grade) : 0).strength(3)
+    : d3.forceY((d, i) => (d.type === 'kanji') ? i%5 * 1000 + 500 : -200).strength(0.8)
+  $: xForce = d3.forceX(d => 0).strength(3)
 
+  // Define different simulation based on the screen size
   let simulation 
-  $: if (nodes && linkForce && collideForce && xForce && yForce) {
-      simulation = d3.forceSimulation(nodes)
-      .force("link", linkForce)
+  $: if (screenSize === 'small') {
+    console.log('screen is small')
+    nodes = dataFiltered.nodes.map(d => Object.create(d));
+    links = dataFiltered.links.map(d => Object.create(d));
+    simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id))
+      .force("collide", collideForce)
+      .force('xForce', xForce)
+      .force('yForce', yForce)
+      .force("radial", null)
+  }
+  $: if (screenSize === 'large' || screenSize === 'medium') {
+    console.log(`screen is ${screenSize}`)
+    nodes = dataFiltered.nodes.map(d => Object.create(d));
+    links = dataFiltered.links.map(d => Object.create(d));
+    simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id))
       .force("collide", collideForce)
       .force("radial", radialForce)
+      .force("xForce", null)
+      .force("yForce", null)
   }
 
-
-  let linkG
-  let nodesG
   let simulationFinished = false
-  beforeUpdate(() => {
-    if (simulation) {
-      const NUM_ITERATIONS = 100;
-      for (let i = 0; i < NUM_ITERATIONS; ++i) {
-        simulation.tick();
-      };
-      simulation.stop();
-      simulationFinished = true
-    }
-  })
+  const NUM_ITERATIONS = 400;
+  // ***Important***
+  // We need to store the nodes and links in separate variables and update them with '='
+  // Then loop over these variables when rendering the nodes and links in DOM
+  // This is so that svelte knows there has been an update and it should re-render the dom 
+  // Since the d3 force simulation updates the nodes and links props without re-assigning these (which is what svelte needs to see)
+  let nodesSimulation = undefined
+  let linksSimulation = undefined
+  // // Option 1: With simulation movemenet visible
+  // $: if (simulation) {
+  //   simulation.restart()
+  //   simulation.on('tick', d => {
+  //     // console.log('tick') // Uncomment to see the ticks
+  //     nodesSimulation = nodes
+  //     linksSimulation = links
+  //   })
+  //   setTimeout(() => {
+  //     simulationFinished = true
+  //   }, 50);
+  // }
 
-
-  $: console.log('nodes', nodes)
-
+  //Option 2: Render the final position of the graph after NUM_ITERATIONS number of ticks
+  $: if (simulation) {
+    simulation.tick(NUM_ITERATIONS)
+    simulation.stop()
+    nodesSimulation = [...nodes]
+    linksSimulation = [...links]
+    simulationFinished = true
+  }
 
 </script>
 
@@ -162,15 +181,14 @@
 <section id='kanji-graph-section'>
   <div
     id='kanji-graph-container'
-    bind:this={graphContainer}
     bind:clientHeight={height}
     bind:clientWidth={width}
   >
-  {#if simulationFinished}
-  <svg width={width} height={small ? smallSize.height : width }>
-    <g class='g-kanji-graph' transform='translate({width*0.5}, {small ? 0 : width*0.5})'>
-      <g class='g-links' stroke={colours.colLinks} bind:this={linkG}>
-        {#each links as link}
+  {#if simulationFinished && typeof(nodesSimulation) !== undefined && typeof(linksSimulation) !== undefined}
+  <svg width={width} height={small ? smallSizeProps.height : width * 0.9}>
+    <g class='g-kanji-graph' transform='translate({width*0.5}, {small ? 0 : width*0.45})'>
+      <!-- <g class='g-links' stroke={colours.colLinks}>
+        {#each linksSimulation as link}
           <line 
             class='link'
             x1={link.source.x}
@@ -179,11 +197,12 @@
             y2={link.target.y}
           ></line>
         {/each}
-      </g>
+      </g> -->
       <g class='g-nodes'>
-        {#each nodes as node}
+        {#each nodesSimulation as node}
           <g class='node-g' transform='translate({node.x}, {node.y})'>
             <rect
+              class='node-rect-grade'
               x={-widthKanjiBox/2}
               y={-widthKanjiBox/2}
               width={widthKanjiBox}
@@ -191,8 +210,22 @@
               transform={scaleFunctionNodes(node)}
               fill={node.type === 'kanji' ? colourByGradeScale(node.Grade) : colours.colRadicals}
               stroke={node.type === 'kanji' ? colourByGradeScale(node.Grade) : colours.colStrokeRadicals}
+              style='stroke-width: {node.type === 'kanji' ? 4 : 2.4}; stroke-opacity={node.type === 'kanji' ? 0.5 : 0.7}'
+              rx={node.type === 'kanji' ? 0 : 10}
             >
             </rect>
+            <text
+              class='node-text-grade'
+              class:kanji-text-grade={node.type === 'kanji'}
+              class:radical-text-grade={node.type === 'radical'}
+              dy='0.35em'
+              fontSize={`${widthKanjiBox * 0.75}px`}
+              stroke='none'
+              fill={node.type === 'radical' ? colours.colRadicalsText : colours.colKanjiText}
+              transform={scaleFunctionNodes(node)}
+            >
+              {node.id.split('-')[0]}
+            </text>
           </g>
         {/each}
       </g>
@@ -228,33 +261,16 @@
     }
   }
 
-
-  :global {
-        text.node-text {
-        }
-        text.radical-text {
-          font-weight: 300;
-          font-family: 'Noto Sans JP', sans-serif;
-        }
-        text.kanji-text {
-          font-weight: 300;
-          font-family: 'Noto Sans JP', sans-serif;
-        }
-        text.subcategories-nodes-label, text.subcategories-entries-num, text.subcategories-entries-text {
-          font-size: 14px;
-          fill: #4d5054;
-          font-family: 'houschka-rounded', sans-serif;
-          font-weight: 600;
-        }
-        text.subcategories-entries-text {
-          font-size: 16px;
-          font-weight: 300;
-        }
-        text.subcategories-label {
-          font-size: 20px;
-          fill: #4d5054;
-          font-family: 'houschka-rounded', sans-serif;
-          font-weight: 600;
-        }
+  text.node-text-grade {
+    text-anchor: middle;
   }
+  text.radical-text-grade {
+    font-weight: 300;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  text.kanji-text-grade {
+    font-weight: 300;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
 </style>

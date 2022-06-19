@@ -57,7 +57,7 @@
         rect.update()
       } 
     }
-    //return frame
+
   }
 
 const resize = () => {

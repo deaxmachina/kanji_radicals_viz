@@ -13,7 +13,7 @@
   const categories = _.uniqBy(dataGraphCategory.nodes, d => d.category).map(d => d.category).filter(d => d !== 0)
 
   // Which view of the data to see - by topic or by grade
-  let view = 'topic'
+  let view = 'grade'
   const setView = (e) => {
     view = e.detail.text
   }
