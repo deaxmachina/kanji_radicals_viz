@@ -52,11 +52,11 @@ export default {
     }),
     vite: {
 			ssr: {
-				noExternal: ['d3', 'd3-appendselect'],
+				noExternal: ['d3', 'd3-appendselect', 'hex-rgb'],
 			},
 			optimizeDeps: {
 				exclude: [],
-				include: ['hex-rgb'],
+				include: [],
 			  },
 		}
   }
