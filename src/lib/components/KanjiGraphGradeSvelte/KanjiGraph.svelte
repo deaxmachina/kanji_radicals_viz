@@ -16,8 +16,8 @@
   let height
   // Resposive markers
   $: small = width < 900
-  $: medium = width >= 900 && width < 1200
-  $: large = width >= 1200
+  $: medium = width >= 900 && width < 1300
+  $: large = width >= 1300
   $: screenSize = small ? 'small' : medium ? 'medium' : large ? 'large' : undefined
   // Responsive sizes 
   $: marginForOuterCircle = 200 // How much to leave around outer circle of kanji so that they comfortably fit - for secondary level only
@@ -175,6 +175,9 @@
     simulationFinished = true
   }
 
+  // Interactivity
+  let nodesToHighlightIds = [] // Store the ids of the nodes we want to highlight on hover
+
 </script>
 
 
@@ -185,7 +188,11 @@
     bind:clientWidth={width}
   >
   {#if simulationFinished && typeof(nodesSimulation) !== undefined && typeof(linksSimulation) !== undefined}
-  <svg width={width} height={small ? smallSizeProps.height : width * 0.9}>
+  <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+  <svg 
+    width={width} height={small ? smallSizeProps.height : width * 0.9}
+    on:mouseover|self={() => { nodesToHighlightIds = [] }}
+  >
     <g class='g-kanji-graph' transform='translate({width*0.5}, {small ? 0 : width*0.45})'>
       <!-- <g class='g-links' stroke={colours.colLinks}>
         {#each linksSimulation as link}
@@ -200,7 +207,21 @@
       </g> -->
       <g class='g-nodes'>
         {#each nodesSimulation as node}
-          <g class='node-g' transform='translate({node.x}, {node.y})'>
+          <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+          <g 
+            class='node-g' 
+            transform='translate({node.x}, {node.y})'
+            on:mouseenter={(e) => {
+              // All the target nodes for selected node
+              const targetNodesIds = linksCopy.filter(l => l.target === node.id).map(l => l.source)
+              const sourceNodesIds = linksCopy.filter(l => l.source === node.id).map(l => l.target)
+              // The selected node itself 
+              const hoveredNode = node.id
+              // Add the nodes that we want to highlight
+              nodesToHighlightIds = [...targetNodesIds, ...sourceNodesIds, hoveredNode]
+            }}
+            style='opacity: { nodesToHighlightIds.length > 0 ? nodesToHighlightIds.includes(node.id) ? 1 : 0.1 : 1 }'
+          >
             <rect
               class='node-rect-grade'
               x={-widthKanjiBox/2}
@@ -210,7 +231,10 @@
               transform={scaleFunctionNodes(node)}
               fill={node.type === 'kanji' ? colourByGradeScale(node.Grade) : colours.colRadicals}
               stroke={node.type === 'kanji' ? colourByGradeScale(node.Grade) : colours.colStrokeRadicals}
-              style='stroke-width: {node.type === 'kanji' ? 4 : 2.4}; stroke-opacity={node.type === 'kanji' ? 0.5 : 0.7}'
+              style='
+                stroke-width: {node.type === 'kanji' ? 4 : 2.4}; 
+                stroke-opacity: {node.type === 'kanji' ? 0.95 : 1};
+              '
               rx={node.type === 'kanji' ? 0 : 10}
             >
             </rect>
@@ -258,6 +282,7 @@
   g.g-nodes {
     g.node-g {
       cursor: pointer;
+      transition: all 0.5s ease;
     }
   }
 

@@ -158,8 +158,6 @@ class KanjiGraph {
     const linkG = g.appendSelect("g.g-links")
       .attr('class', 'g-links')
       .style("stroke", colours.colLinks)
-      .style("stroke-opacity", 0.5)
-      .style("stroke-width", 0.4)
       
     const linksLine = linkG.selectAll(".link")
         .data(links)
@@ -169,6 +167,8 @@ class KanjiGraph {
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y)
+        .style("stroke-opacity", 0.3)
+        .style("stroke-width", 0.4)
 
     ////////////////////////////////
     /////////// Nodes //////////////
@@ -395,12 +395,12 @@ class KanjiGraph {
           const nodesToHighlightIds = [...targetNodesIds, ...sourceNodesIds]
           // Highlight the selected links
           linksLine
-            .transition().duration(100)
+            .transition().duration(500)
             .style('stroke-opacity', l => l.source.id === d.id || l.target.id === d.id ? 1 : 0)
             .style("stroke-width", l => l.source.id === d.id || l.target.id === d.id ? 2 : 0.3)
           // Highlight the connected nodes
           nodesG
-            .transition().duration(100)
+            .transition().duration(500)
             .style('opacity', n => n.id === d.id || nodesToHighlightIds.includes(n.id) ? 1 : 0.1)
           // Update the count of kanji per category for the hovered radical
           if (d.type === 'radical') {
@@ -411,11 +411,11 @@ class KanjiGraph {
       .on("mouseleave", (evt, d) => {
         // Restore original graph
         linksLine
-          .transition().duration(100)
+          .transition().duration(500)
           .style('stroke-opacity', 0.3)
-          .style("stroke-width", 0.2)
+          .style("stroke-width", 0.4)
         nodesG
-          .transition().duration(100)
+          .transition().duration(500)
           .style('opacity', 1)
         // Remove any kanji per category text
         drawSubcategoriesList()
