@@ -1,10 +1,11 @@
 <script>
   import _ from 'lodash'
   import '$lib/styles/global.scss';
-  import { selectedCategory } from '$lib/stores.js'
+  import { selectedCategory, selectedKanji } from '$lib/stores.js'
 
   import { filterKanjiDataByCategory } from './helperFunctions.js'
   import KanjiGraph from './KanjiGraph.js'
+  import KanjiPopup from '../KanjiPopup/KanjiPopup.svelte'
 
   // Props passed down 
   export let dataGraph
@@ -102,10 +103,16 @@
     
 	}
 
+  // Kanji meaning popup 
+  $: console.log($selectedKanji)
+
 </script>
 
 
 <section id='kanji-graph-section'>
+  {#if $selectedKanji}
+    <KanjiPopup />
+  {/if}
   <div
     id='kanji-graph-container'
     bind:this={graphContainer}
@@ -123,6 +130,7 @@
   #kanji-graph-section {
     width: 100%;
     margin: auto;
+    position: relative;
   }
   #kanji-graph-container {
     margin: auto;

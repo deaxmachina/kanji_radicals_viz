@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { appendSelect } from 'd3-appendselect';
 import _ from 'lodash';
+import { selectedKanji } from '$lib/stores.js'
 d3.selection.prototype.appendSelect = appendSelect;
 
 class KanjiGraph {
@@ -377,7 +378,17 @@ class KanjiGraph {
       return kanjiPerCategoryArr
     }
     nodesG
-      .on("mouseenter", (evt, d) => {
+      .on('click', (e, d) => {
+        // Send the kanji up along the store
+        if (d.type === 'kanji') {
+          const grade = _.find(dataKanjiLevels, e => e.kanji === d.kanji) ? _.find(dataKanjiLevels, e => e.kanji === d.kanji).Grade : 'none'
+          const kanjiData = { 
+            kanji: d.kanji, radicals: d.radicals, kun_readings: d.kun_readings, on_readings: d.on_readings, meanings: d.meanings, grade: grade
+          }
+          selectedKanji.set(kanjiData)
+        }
+      })
+      .on("mouseenter", (e, d) => {
           // All the target nodes for selected node
           const targetNodesIds = linksCopy.filter(l => l.target === d.id).map(l => l.source)
           const sourceNodesIds = linksCopy.filter(l => l.source === d.id).map(l => l.target)
@@ -416,6 +427,13 @@ class KanjiGraph {
           // Remove any kanji per category text
           d3.selectAll('text.subcategories-entries-radicals').remove()
       })
+
+      // Unselect kanji when click on svg outside the graph
+      svg.on("click", function(e, datum){
+        if (this == e.target) {
+          selectedKanji.set('')
+        }
+      });
 
 		return this;
 	}
