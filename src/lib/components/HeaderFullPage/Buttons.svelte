@@ -1,6 +1,7 @@
 <script>
   import '$lib/styles/colors.scss'
   import { createEventDispatcher } from 'svelte';
+  import { selectedKanji } from '$lib/stores.js'
 
   const dispatch = createEventDispatcher();
 
@@ -17,7 +18,7 @@
 </script>
 
 <div class='selection-buttons-section'>
-  <button class:active={selectedView === 'grade'} class='grade-btn' on:click={() => setView('grade')}>
+  <button class:active={selectedView === 'grade'} class='grade-btn' on:click={() => { setView('grade'); selectedKanji.set('') }}>
     <h5>grade</h5>
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <div 
@@ -27,7 +28,9 @@
     >?</div>
     <div class='message' style='opacity: {revealQuestion ? 1 : 0}'>! very slow, wait patiently~</div>
   </button>
-  <button class:active={selectedView === 'topic'} class='topic-btn' on:click={() => setView('topic')}><h5>topic</h5></button>
+  <button class:active={selectedView === 'topic'} class='topic-btn' on:click={() => { setView('topic'); selectedKanji.set('') }}>
+    <h5>topic</h5>
+  </button>
   <p>by</p>
 </div>
 

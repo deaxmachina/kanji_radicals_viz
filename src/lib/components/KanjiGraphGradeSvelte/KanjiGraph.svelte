@@ -3,7 +3,8 @@
   import _ from 'lodash'
   import '$lib/styles/global.scss';
   import { getDataFilteredS, getDataFilteredP } from './helperFunctions'
-  import { selectedLevel } from '$lib/stores.js'
+  import { selectedLevel, selectedKanji } from '$lib/stores.js'
+  import KanjiPopup from '../KanjiPopup/KanjiPopup.svelte'
 
   // Props passed down 
   export let dataGraph
@@ -182,6 +183,9 @@
 
 
 <section id='kanji-graph-section'>
+  {#if $selectedKanji}
+    <KanjiPopup />
+  {/if}
   <div
     id='kanji-graph-container'
     bind:clientHeight={height}
@@ -192,6 +196,7 @@
   <svg 
     width={width} height={small ? smallSizeProps.height : width * 0.9}
     on:mouseover|self={() => { nodesToHighlightIds = [] }}
+
   >
     <g class='g-kanji-graph' transform='translate({width*0.5}, {small ? 0 : width*0.45})'>
       <!-- <g class='g-links' stroke={colours.colLinks}>
@@ -211,6 +216,19 @@
           <g 
             class='node-g' 
             transform='translate({node.x}, {node.y})'
+            on:click={(e) => {
+              if (node.type === 'kanji') {
+                const kanjiData = { 
+                  kanji: node.id.split('-')[0], 
+                  radicals: node.radicals, 
+                  kun_readings: node.kun_readings, 
+                  on_readings: node.on_readings, 
+                  meanings: node.meanings, 
+                  grade: node.Grade
+                }
+                selectedKanji.set(kanjiData)
+              }
+            }}
             on:mouseenter={(e) => {
               // All the target nodes for selected node
               const targetNodesIds = linksCopy.filter(l => l.target === node.id).map(l => l.source)
@@ -267,6 +285,7 @@
   #kanji-graph-section {
     width: 100%;
     margin: auto;
+    position: relative;
   }
   #kanji-graph-container {
     margin: auto;

@@ -4,6 +4,7 @@
   export let categories
   export let levels = ['Primary school', 'Secondary school']
   export let view
+  import { selectedKanji } from '$lib/stores.js'
 
 </script>
 
@@ -13,13 +14,13 @@
   </h2>
   <div class='custom-select'>
     {#if view === 'topic'}
-      <select bind:value={$selectedCategory}>
+      <select bind:value={$selectedCategory} on:change={() => selectedKanji.set('')}>
         {#each categories as category}
           <option value={category}>{category}</option>
         {/each}
       </select>
     {:else if view === 'grade'}
-      <select bind:value={$selectedLevel}>
+      <select bind:value={$selectedLevel} on:change={() => selectedKanji.set('')}>
         {#each levels as level}
           <option value={level}>{level}</option>
         {/each}

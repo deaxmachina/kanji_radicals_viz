@@ -29,7 +29,7 @@
 </script>
 
 
-<div class='popup-container'>
+<div class='popup-container' on:click|self={() => { selectedKanji.set('') }}>
   <div class='kanji-popup-wrapper'>
 
     <div class='kanji-level-radicals'>
@@ -83,14 +83,15 @@
     width: 100%;
     height: 100%;
     background-color: #f7ede2b6;
-    pointer-events: none;
+    //pointer-events: none;
     z-index: 2;
   }
   .kanji-popup-wrapper {
     box-sizing: border-box;
     position: sticky;
     top: 20%;
-    left: 50%;
+    //left: 50%;
+    margin-left: 50%;
     z-index: 3;
     transform: translate(-50%, 0);
     transition: all 0.3s ease;
@@ -100,7 +101,9 @@
     border-radius: 20px;
     border: 5px solid $col-mid-grey;
     pointer-events: all;
-    @media (max-width: 900px) {
+    @media (max-width: 800px) {
+      // left: 0%;
+      // margin-left: 50%;
     }
     @media (max-width: 400px) {
       width: calc(100% - 10px);

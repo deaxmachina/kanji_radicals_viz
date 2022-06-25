@@ -429,11 +429,11 @@ class KanjiGraph {
       })
 
       // Unselect kanji when click on svg outside the graph
-      svg.on("click", function(e, datum){
-        if (this == e.target) {
-          selectedKanji.set('')
-        }
-      });
+      // svg.on("click", function(e, datum){
+      //   if (this == e.target) {
+      //     selectedKanji.set('')
+      //   }
+      // });
 
 		return this;
 	}
