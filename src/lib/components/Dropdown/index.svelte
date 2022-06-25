@@ -16,7 +16,7 @@
     {#if view === 'topic'}
       <select bind:value={$selectedCategory} on:change={() => selectedKanji.set('')}>
         {#each categories as category}
-          <option value={category}>{category}</option>
+          <option value={category}>{category.toLowerCase()}</option>
         {/each}
       </select>
     {:else if view === 'grade'}

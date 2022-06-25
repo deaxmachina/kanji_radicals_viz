@@ -343,11 +343,11 @@ class KanjiGraph {
               .transition().delay((d, i) => (subcategories.length - i) * 70)
               .style('opacity', 0)
               .remove()
-            subcategoriesExpandBtnSymbol.attr('d', pathPlusBtn)
             d3.selectAll("rect.subcategories-list-bg")
               .transition().duration(1000)
               .style('opacity', 0)
-              .remove()
+              //.remove()
+            subcategoriesExpandBtnSymbol.attr('d', pathPlusBtn)
           }
           expanded = !expanded
       })
