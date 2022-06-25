@@ -303,21 +303,10 @@ class KanjiGraph {
         .attr('dy', '0.35em')
         .attr('dx', '25px')
         .style('text-anchor', 'start')
-      
-      if (radicalData) {
-        const subcategoriesEntriesRadicals = subcategoriesEntryG.appendSelect('text.subcategories-entries-radicals')
-        .text((d, i) => radicalData.filter(el => el.category === d).length > 0 ? radicalData.filter(el => el.category === d)[0].count : '')
-        .attr('dy', '0.35em')
-        .attr('dx', '-20px')
-        .style('text-anchor', 'end')
-        .style('fill', colours.colAccent)
-      } else {
-        d3.selectAll('text.subcategories-entries-radicals').remove()
-      }
 
       subcategoriesEntryG.transition().delay((d, i) => i * 100)
         .style('opacity', 1)
-        .attr('transform', (d, i) => `translate(${radicalData ? 30 : 0}, ${i*35 + 60})`)
+        .attr('transform', (d, i) => `translate(${0}, ${i*35 + 60})`)
     }
 
     // Label 'Subcategories'
@@ -405,7 +394,14 @@ class KanjiGraph {
           // Update the count of kanji per category for the hovered radical
           if (d.type === 'radical') {
             const radicalData = getCountOfKanjiCatPerRadical(d.id)
-            drawSubcategoriesList(radicalData)
+            const subcategoriesEntriesRadicals = subcategoriesListG
+              .selectAll('.subcategory-entry-g')
+                .appendSelect('text.subcategories-entries-radicals')
+                .text((d, i) => radicalData.filter(el => el.category === d).length > 0 ? radicalData.filter(el => el.category === d)[0].count : '')
+                .attr('dy', '0.35em')
+                .attr('dx', '-20px')
+                .style('text-anchor', 'end')
+                .style('fill', colours.colAccent)
           }
       })
       .on("mouseleave", (evt, d) => {
@@ -417,8 +413,8 @@ class KanjiGraph {
         nodesG
           .transition().duration(500)
           .style('opacity', 1)
-        // Remove any kanji per category text
-        drawSubcategoriesList()
+          // Remove any kanji per category text
+          d3.selectAll('text.subcategories-entries-radicals').remove()
       })
 
 		return this;
