@@ -196,7 +196,6 @@
   <svg 
     width={width} height={small ? smallSizeProps.height : width * 0.9}
     on:mouseover|self={() => { nodesToHighlightIds = [] }}
-
   >
     <g class='g-kanji-graph' transform='translate({width*0.5}, {small ? 0 : width*0.45})'>
       <!-- <g class='g-links' stroke={colours.colLinks}>

@@ -3,7 +3,8 @@
   import '$lib/styles/global.scss';
   import HeaderFullPage from '$lib/components/HeaderFullPage/index.svelte'
   import KanjiGraphCategory from '$lib/components/KanjiGraphCategory/KanjiGraph.svelte'
-  import KanjiGraphGrade from '$lib/components/KanjiGraphGradeSvelte/KanjiGraph.svelte'
+  //import KanjiGraphGrade from '$lib/components/KanjiGraphGradeSvelte/KanjiGraph.svelte'
+  import KanjiGraphGrade from '$lib/components/KanjiGraphGradeCanvas/KanjiGraph.svelte'
   import Dropdown from '$lib/components/Dropdown/index.svelte'
   import Footer from '$lib/components/Footer/index.svelte'
   import GradeLegend from '$lib/components/GradeLegend/index.svelte'
