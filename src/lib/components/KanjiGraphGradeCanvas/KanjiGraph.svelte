@@ -106,7 +106,7 @@
   $: radialForceP = d3.forceRadial(d => d.type === 'kanji' ?  
       medium ? levelsRadialMedium[d.Grade] : large ? levelsRadialLarge[d.Grade] : 0
     : 0
-  ).strength(2.3)
+  ).strength(1)
   $: radialForceS = d3.forceRadial(d => d.type === 'kanji' ? radiusSecondary : 0).strength(0.9)
   $: radialForce = $selectedLevel === 'Primary school' ? radialForceP : radialForceS
 
@@ -119,48 +119,69 @@
       //.force('center', centerForce)
 
 
-  let ctx
-  let scale = 1
-  onMount(() => {
-    ctx = canvasEl.getContext('2d');
-    //const scale = window.devicePixelRatio;
-    // ctx.canvas.width = width * scale;
-    // ctx.canvas.height = height * scale;
-    // ctx.scale(scale, scale);
-  })
+  const widthN = 5
 
-  $: if (ctx) {
-    ctx.canvas.width = width * scale;
-    ctx.canvas.height = height * scale;
-  }
-  $: resize = () => {
+  const resize = (ctx) => {
+    const { width, height } = wrapperEl.getBoundingClientRect()
+    const scale = window.devicePixelRatio;
     resizeOcurred = true
     ctx.canvas.width = width * scale;
     ctx.canvas.height = height * scale;
-    // ctx.scale(scale, scale);
+    ctx.scale(scale, scale);
+
+    simulation.on('tick', () => { 
+        ctx.clearRect(0, 0, width, height)
+        ctx.save();
+        for (const [i, node] of nodes.entries()) {
+          const x = widthKanjiBox * scaleFunctionNodes(node)
+          const y = widthKanjiBox * scaleFunctionNodes(node)
+          ctx.beginPath();
+          ctx.moveTo(width/2 + node.x, height/2 + node.y);
+          ctx.arc(width/2 + node.x, height/2 + node.y, x, 0, 2 * Math.PI);
+          
+          ctx.fillStyle = 'green'
+          ctx.strokeStyle = 'blue'
+          ctx.fill()
+          ctx.stroke()
+        }
+        ctx.restore()
+    })
   }
 
-  const widthN = 5
-  $: simulation.on('tick', () => { 
-      ctx.clearRect(0, 0, width, height)
-      ctx.save();
-      for (const [i, node] of nodes.entries()) {
-        ctx.beginPath();
-        ctx.moveTo(width/2 + node.x + widthN, height/2 + node.y);
-        ctx.arc(width/2 + node.x, height/2 + node.y, widthN, 0, 2 * Math.PI);
-        ctx.fillStyle = 'green'
-        ctx.strokeStyle = 'blue'
-        ctx.fill()
-        ctx.stroke()
-      }
-      ctx.restore()
-    })
+  onMount(() => {
+    const ctx = canvasEl.getContext('2d');
+    const { width, height } = wrapperEl.getBoundingClientRect()
+    const scale = window.devicePixelRatio;
+    ctx.canvas.width = width * scale;
+    ctx.canvas.height = height * scale;
+    ctx.scale(scale, scale);
+
+    simulation.on('tick', () => { 
+        ctx.clearRect(0, 0, width, height)
+        ctx.save();
+        for (const [i, node] of nodes.entries()) {
+          const x = widthKanjiBox * scaleFunctionNodes(node)
+          ctx.beginPath();
+          ctx.moveTo(width/2 + node.x + widthN, height/2 + node.y);
+          ctx.arc(width/2 + node.x, height/2 + node.y, x, 0, 2 * Math.PI);
+          ctx.scale(scaleFunctionNodes(node), scaleFunctionNodes(node))
+          ctx.fillStyle = 'green'
+          ctx.strokeStyle = 'blue'
+          ctx.fill()
+          ctx.stroke()
+        }
+        ctx.restore()
+      })
+    
+    window.addEventListener('resize', () => resize(ctx))
+  })
+
+
 
 
 
 </script>
 
-<svelte:window on:resize={resize}/>
 
 <section id='kanji-graph-section'>
   {#if $selectedKanji}

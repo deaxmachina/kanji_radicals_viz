@@ -17,8 +17,8 @@
     <h2 class='section-heading'>About</h2>
     <p>
       Japanese kanji contain one radical each. 
-      For example, you can see the radical of each Jyouyou 
-      kanji in this <a href='https://en.wikipedia.org/wiki/List_of_j%C5%8Dy%C5%8D_kanji'>Wiki page</a>.
+      For example, you can see the radical of each jōyō  
+      kanji (常用漢字) on this <a href='https://en.wikipedia.org/wiki/List_of_j%C5%8Dy%C5%8D_kanji'>Wiki page</a>.
       <br>
       As you can see in the graphs above, here each kanji can contain multiple radicals ('building blocks'). 
       My hypothesis was that visualising kanji like this, i.e. using a force graph that naturally nudges kanji 
@@ -27,14 +27,14 @@
       to similar meaning categories and their constituent parts. 
       <br>
       It seems like some interesting clear patterns emerge, such the large number of appearances of 
-      the radical <strong>心</strong> 💜 in emotion-revealing kanji. In other cases, it’s harder to see a pattern 🤷‍♀️.
+      the radical <strong>心</strong> 💜 in emotion-revealing kanji. In other cases, it’s harder to see a pattern.
     </p>
     <p>
       I made the kanji graphs just for myself initially, but it grew into a more proper page. However, 
-      I am just a humble student of Japanese, so don’t treat it as a rigorous language resource 👓. 
-      The page is also very slow. This is because it's made of thousands of svg shapes. 
-      I might re-do it for performance, but in the meantime, be patient with it. 
-      Wait a little bit ⏳ when you click so that the kanji have time to arrange themselves in the final nice graph form. 
+      I am just a humble student of Japanese, so don’t treat it as a rigorous language resource. 
+      The page is also very slow. This is because it's made of thousands of svg shapes. I removed responsiveness for the grade graph 
+      to speed it up a bit. I might re-do it a different way if there is interest, but in the meantime, be patient with it. 
+      Wait a little bit when you click so that the kanji have time to arrange themselves in the final nice graph form. 
     </p>
     <p>
       Ultimately, this page is <strong>hopefully</strong> a fun way to explore kanji and use radical patterns to 

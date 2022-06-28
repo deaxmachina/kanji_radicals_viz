@@ -2,7 +2,7 @@
   import * as d3 from 'd3'
   import _ from 'lodash'
   import '$lib/styles/global.scss';
-  import { getDataFilteredS, getDataFilteredP, getDataFilteredGrade } from './helperFunctions'
+  import { getDataFilteredS, getDataFilteredP } from './helperFunctions'
   import { selectedLevel, selectedKanji } from '$lib/stores.js'
   import KanjiPopup from '../KanjiPopup/KanjiPopup.svelte'
 
@@ -12,36 +12,13 @@
   ////////////////////////////////////////////////////////
   /////////////////// Graph properties ///////////////////
   ////////////////////////////////////////////////////////
-  // Width and height of the graph container (read-only variables)
-  let width
-  let height
-  // Resposive markers
-  $: small = width < 900
-  $: medium = width >= 900 && width < 1300
-  $: large = width >= 1300
-  $: screenSize = small ? 'small' : medium ? 'medium' : large ? 'large' : undefined
-  // Responsive sizes 
-  $: marginForOuterCircle = 200 // How much to leave around outer circle of kanji so that they comfortably fit - for secondary level only
-  $: radiusSecondary = width/2 - marginForOuterCircle // Radius for the kanji around the radicals - for secondar level only
-  $: widthKanjiBox = large ? 24 : 20 // Size of the kanji squares (or circles) depending on width
-  
-  /// Constant Props ///
-  // The radius that each grade should be at if selected level is primary school
-  // For big screens
-  //const levelsRadialLarge = ({ '1': 350, '2': 440, '3': 530, '4': 620, '5': 710, '6': 800 })
-  const levelsRadialLarge = ({ '1': 350, '2': 450, '3': 550, '4': 650, '5': 750, '6': 850 })
-  // For medium screens
-  const levelsRadialMedium = ({ '1': 250, '2': 300, '3': 350, '4': 400, '5': 450, '6': 500 })
-  // Other positioning constants for different screen sizes
-  const smallSizeProps = {
-    height: 3000,
-    verticalScaleFactor: 2.5,
-    yOffsetForKanjiStart: 700
-  }
-  const mediumSizeProps = {
-    height: 2000,
-    yOffsetForKanjiStart: 500
-  }
+  const width = 1400;
+  const height = width
+  const marginForOuterCircle = 100 // How much to leave around outer circle of kanji so that they comfortably fit - for secondary level only
+  const radiusSecondary = width/2 - marginForOuterCircle // Radius for the kanji around the radicals - for secondar level only
+  const widthKanjiBox = 24
+  //const levelsRadial = ({ '1': 350, '2': 450, '3': 550, '4': 650, '5': 750, '6': 850 })
+  const levelsRadial = ({ '1': 350, '2': 420, '3': 490, '4': 560, '5': 630, '6': 700 })
   const grades = ['1', '2', '3', '4', '5', '6', 'S']
   const colours = {
       colBg: '#f7ede2',//'#f7ede2', //'#352d39',
@@ -76,10 +53,6 @@
   ////////////////////////////////////////////////////////
   /////////////////////// Scales  ////////////////////////
   ////////////////////////////////////////////////////////
-  // Scale for mobile to position vertically 
-  $: subcategoryVerticalScale = d3.scalePoint()
-    .domain(['1', '2', '3', '4', '5', '6'])
-    .range([smallSizeProps.yOffsetForKanjiStart, smallSizeProps.height + 200])
 
   // Colour scale for kanji by level (grade)
   const colourByGradeScale = d3.scaleOrdinal()
@@ -106,39 +79,16 @@
   $: scaleFunctionNodes = d => `scale(${scaleFunction(d)})`
   $: radiusCollide = d => d.type === 'radical' ? widthKanjiBox * 0.55 * scaleFunction(d) : widthKanjiBox*0.65
   $: collideForce = d3.forceCollide().radius(radiusCollide).iterations(2).strength(1)
-  //$: radialForceP = d3.forceRadial(d => d.type === 'kanji' ? levelsRadialLarge[d.Grade] : 0).strength(2.5)
-  $: radialForceP = d3.forceRadial(d => d.type === 'kanji' ?  
-      medium ? levelsRadialMedium[d.Grade] : large ? levelsRadialLarge[d.Grade] : 0
-    : 0
-  ).strength(2.3)
+  $: radialForceP = d3.forceRadial(d => d.type === 'kanji' ? levelsRadial[d.Grade] : 0).strength(2.3)
   $: radialForceS = d3.forceRadial(d => d.type === 'kanji' ? radiusSecondary : 0).strength(0.9)
   $: radialForce = $selectedLevel === 'Primary school' ? radialForceP : radialForceS
-  //$: linkForce = d3.forceLink(links).id(d => d.id)//.strength(1.2)
-  // Vertically position 
-  $: yForce = $selectedLevel === 'Primary school' 
-    ? d3.forceY(d => (d.type === 'kanji') ? subcategoryVerticalScale(d.Grade) : 0).strength(3)
-    : d3.forceY((d, i) => (d.type === 'kanji') ? i%5 * 1000 + 500 : -200).strength(0.8)
-  $: xForce = d3.forceX(d => 0).strength(3)
 
-  // Define different simulation based on the screen size
   let simulation 
-  $: if (screenSize === 'small') {
-    console.log('screen is small')
+  $: {
     nodes = dataFiltered.nodes.map(d => Object.create(d));
     links = dataFiltered.links.map(d => Object.create(d));
     simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id))
-      .force("collide", collideForce)
-      .force('xForce', xForce)
-      .force('yForce', yForce)
-      .force("radial", null)
-  }
-  $: if (screenSize === 'large' || screenSize === 'medium') {
-    console.log(`screen is ${screenSize}`)
-    nodes = dataFiltered.nodes.map(d => Object.create(d));
-    links = dataFiltered.links.map(d => Object.create(d));
-    simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id))
+      .force("link", d3.forceLink(links).id(d => d.id).strength(0.1))
       .force("collide", collideForce)
       .force("radial", radialForce)
       .force("xForce", null)
@@ -146,7 +96,7 @@
   }
 
   let simulationFinished = false
-  const NUM_ITERATIONS = 400;
+  const NUM_ITERATIONS = 300;
   // ***Important***
   // We need to store the nodes and links in separate variables and update them with '='
   // Then loop over these variables when rendering the nodes and links in DOM
@@ -154,7 +104,7 @@
   // Since the d3 force simulation updates the nodes and links props without re-assigning these (which is what svelte needs to see)
   let nodesSimulation = undefined
   let linksSimulation = undefined
-  // // Option 1: With simulation movemenet visible
+  // Option 1: With simulation movemenet visible
   // $: if (simulation) {
   //   simulation.restart()
   //   simulation.on('tick', d => {
@@ -188,16 +138,14 @@
   {/if}
   <div
     id='kanji-graph-container'
-    bind:clientHeight={height}
-    bind:clientWidth={width}
   >
   {#if simulationFinished && typeof(nodesSimulation) !== undefined && typeof(linksSimulation) !== undefined}
   <!-- svelte-ignore a11y-mouse-events-have-key-events -->
   <svg 
-    width={width} height={small ? smallSizeProps.height : width * 0.9}
+    width={width} height={height}
     on:mouseover|self={() => { nodesToHighlightIds = [] }}
   >
-    <g class='g-kanji-graph' transform='translate({width*0.5}, {small ? 0 : width*0.45})'>
+    <g class='g-kanji-graph' transform='translate({width*0.5}, {width*0.5})'>
       <!-- <g class='g-links' stroke={colours.colLinks}>
         {#each linksSimulation as link}
           <line 
@@ -206,6 +154,7 @@
             y1={link.source.y}
             x2={link.target.x}
             y2={link.target.y}
+            style='stroke-width: { nodesToHighlightIds.length > 0 ? (nodesToHighlightIds.includes(link.source) || nodesToHighlightIds.includes(link.target)) ? 10 : 0.1 : 1 }'
           ></line>
         {/each}
       </g> -->
@@ -272,6 +221,10 @@
       </g>
     </g>
   </svg>
+  {:else if !simulationFinished}
+    <h1>Wait</h1>
+  {:else}
+    <div></div>
   {/if}
   </div>
 </section>
@@ -288,8 +241,13 @@
   }
   #kanji-graph-container {
     margin: auto;
-    //height: 100vh;
     width: 100%;
+    overflow: auto;
+  }
+
+  svg {
+    display: block;
+    margin: auto;
   }
 
   g.g-links {
