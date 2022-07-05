@@ -11,6 +11,7 @@
   import dataGraphCategory from "./data/graph_categories_all.json"
   import dataGraphGrades from "./data/graph_grades_all.json"
   import dataKanjiLevels from "./data/kanji_levels.json"
+  import SEO from '$lib/components/SEO/index.svelte'
 
   // Default order 
   // const categories = _.uniqBy(dataGraphCategory.nodes, d => d.category).map(d => d.category).filter(d => d !== 0)
@@ -24,6 +25,16 @@
   }
 </script>
 
+<SEO 
+  pageTitle='Kanji + radicals ♡ '
+  faviconPngUrl=''
+  faviconIcoUrl=''
+  siteUrl=''
+  shareTitle=''
+  description=''
+  shareImgUrl=''
+  shareImgAltText=''
+/>
 <div class='wrapper'>
   <HeaderFullPage on:view={setView} />
   <Dropdown {categories} {view} />

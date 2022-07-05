@@ -18,7 +18,7 @@
     <p>
       Japanese kanji contain one radical each. 
       For example, you can see the radical of each jōyō  
-      kanji (常用漢字) on this <a href='https://en.wikipedia.org/wiki/List_of_j%C5%8Dy%C5%8D_kanji'>Wiki page</a>.
+      kanji (常用漢字) on this <a href='https://en.wikipedia.org/wiki/List_of_j%C5%8Dy%C5%8D_kanji' target='_blank'>Wiki page</a>.
       <br>
       As you can see in the graphs above, here each kanji can contain multiple radicals ('building blocks'). 
       My hypothesis was that visualising kanji like this, i.e. using a force graph that naturally nudges kanji 
@@ -27,7 +27,7 @@
       to similar meaning categories and their constituent parts. 
       <br>
       It seems like some interesting clear patterns emerge, such the large number of appearances of 
-      the radical <strong>心</strong> 💜 in emotion-revealing kanji. In other cases, it’s harder to see a pattern.
+      the radical <strong>心</strong> ♡ in emotion-revealing kanji. In other cases, it’s harder to see a pattern.
     </p>
     <p>
       I made the kanji graphs just for myself initially, but it grew into a more proper page. However, 
@@ -38,16 +38,15 @@
     </p>
     <p>
       Ultimately, this page is <strong>hopefully</strong> a fun way to explore kanji and use radical patterns to 
-      remember kanji more easily. Click around to discover what it does ✨. 
+      remember kanji more easily. Click around to discover what it does *✧. 
     </p>
     <div>
-      Get in touch with me 
-      
+      Get in touch with me on <a href='https://twitter.com/DeaBankova' target='_blank'>twitter</a>
       if you see any mistakes or want to chat. 
     </div>
 
     <div class='madeby'>
-      Made with 💖 by Dea Bankova in 2022. 
+      Made with ꒒০⌵୧♡ by Dea Bankova in 2022. 
     </div>
   </div>
 </section>
