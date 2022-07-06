@@ -1,7 +1,9 @@
-<script></script>
+<script>
+  export let view
+</script>
 
 
-<section class='footer-wrapper'>
+<section class='footer-wrapper' class:viewTopic={view === 'topic'}>
   <div class='footer-content'>
     <h2 class='section-heading'>Data</h2>
     <div>
@@ -63,12 +65,18 @@
     background-color: $col-pink-secondary;
     color: white;
     margin: 0;
+    margin-top: 100px;
     padding: 30px 50px;
     .footer-content {
       box-sizing: border-box;
       width: 100%;
       max-width: 700px;
       margin: auto;
+    }
+    &.viewTopic {
+      @media (max-width: 1100px) {
+        margin-top: 100vh;
+      }
     }
   }
 

@@ -48,7 +48,7 @@
   {/if}
 </div>
 
-<Footer />
+<Footer view={view} />
 
 <style lang='scss'>
   @import './styles/global.scss';

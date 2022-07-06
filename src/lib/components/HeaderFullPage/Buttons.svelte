@@ -144,7 +144,14 @@
         border-radius: 50%;
         font-family: 'lores-12', sans-serif;
         font-size: 16px;
-        //border: 0.8px dashed $col-mid-grey;
+        @media (max-width: 700px) {
+          top: -35px; 
+          right: -20px;
+          width: 60px;
+          height: 60px;
+          font-size: 18px;
+          z-index: 200;
+        }
       }
       div.message {
         position: absolute;
@@ -153,6 +160,10 @@
         background-color: $light-color;
         color: $col-mid-grey;
         padding: 0px 5px;
+        @media (max-width: 700px) {
+          top: -35px; 
+          right: 20px;
+        }
       }
     }
 

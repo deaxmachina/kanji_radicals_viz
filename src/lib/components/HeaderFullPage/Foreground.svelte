@@ -106,7 +106,7 @@
     // margin-top: 12%; 
     @media (max-width: 1400px) and (max-height: 1250px) {
       align-items: flex-start;
-      padding-top: max(230px, 20%);
+      padding-top: max(200px, 20%);
     }
   }
 
