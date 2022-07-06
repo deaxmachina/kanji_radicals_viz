@@ -26,14 +26,14 @@
 </script>
 
 <SEO 
-  pageTitle='Kanji + radicals ♡ '
+  pageTitle='˚ʚ♡ɞ˚ Kanji + radicals ₊˚ʚ ᗢ₊˚✧ ﾟ.'
   faviconPngUrl=''
   faviconIcoUrl=''
-  siteUrl=''
-  shareTitle=''
+  siteUrl='https://kanjiviz.netlify.app/'
+  shareTitle='Kanji with radicals'
   description=''
-  shareImgUrl=''
-  shareImgAltText=''
+  shareImgUrl="https://live.staticflickr.com/65535/52196710227_eebccf6157_h.jpg"
+  shareImgAltText="Image containing the words 'kanji with radicals'"
 />
 <div class='wrapper'>
   <HeaderFullPage on:view={setView} />
