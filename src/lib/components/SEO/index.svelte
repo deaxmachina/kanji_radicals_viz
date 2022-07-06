@@ -35,6 +35,7 @@
   <meta name="twitter:title" content={shareTitle}>
   <meta name="twitter:description" content={description}>
   <meta name="twitter:image:src" content={shareImgUrl}>
+  <meta name="twitter:image:alt" content={shareImgAltText}>
   
   
 </svelte:head>

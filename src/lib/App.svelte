@@ -31,7 +31,7 @@
   faviconIcoUrl=''
   siteUrl='https://kanjiviz.netlify.app/'
   shareTitle='Kanji with radicals'
-  description=''
+  description='Interactive graphs of kanji by their constituent radicals, grouped by topic and school grade. Explore and find patterns for easier kanji memorisation ~⋆˙⟡♡!'
   shareImgUrl="https://live.staticflickr.com/65535/52196710227_eebccf6157_h.jpg"
   shareImgAltText="Image containing the words 'kanji with radicals'"
 />
